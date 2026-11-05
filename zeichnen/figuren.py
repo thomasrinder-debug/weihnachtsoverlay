@@ -372,7 +372,11 @@ class Wichtel:
             kittel.lineTo(27 - (k + 0.5) * 9, -42 + h)
             kittel.lineTo(27 - (k + 1) * 9, -50 + h)
         kittel.closeSubpath()
-        p.setBrush(radial(-4, -86 + h, 60, WICHTEL_GRUEN.lighter(125), GRUEN_DUNKEL))
+        kittel_farbe = getattr(d, 'kittel', None)
+        if kittel_farbe is None:
+            p.setBrush(radial(-4, -86 + h, 60, WICHTEL_GRUEN.lighter(125), GRUEN_DUNKEL))
+        else:
+            p.setBrush(radial(-4, -86 + h, 60, kittel_farbe.lighter(125), kittel_farbe.darker(150)))
         p.drawPath(kittel)
         p.setBrush(QColor('#5A3A1E'))
         p.drawRect(QRectF(-23, -68 + h, 46, 7))
@@ -388,14 +392,24 @@ class Wichtel:
         kragen.closeSubpath()
         p.setBrush(ROT)
         p.drawPath(kragen)
-        Wichtel.kopf(p, pose, t, 4, -124 + h, getattr(d, 'knick', None), getattr(d, 'muetze', True))
+        Wichtel.kopf(p, pose, t, 4, -124 + h, getattr(d, 'knick', None), getattr(d, 'muetze', True),
+                     getattr(d, 'maedchen', False))
         _wichtelarm(p, 8, -96 + h, pose.arm_v, False)
 
     @staticmethod
-    def kopf(p, pose, t, x, y, knick=None, muetze=True):
+    def kopf(p, pose, t, x, y, knick=None, muetze=True, maedchen=False):
         """knick: steife Mütze, deren Spitze um knick·90° nach hinten abknickt (None: weiche Zipfelmütze)."""
         vorn = pose.kopf_vorn
         bx = 0 if vorn else 6
+        if maedchen:
+            # zwei Zöpfe mit Schleifen
+            for seite in ((-1, 1) if pose.kopf_vorn else (-1,)):
+                zx = x + seite * (18 if pose.kopf_vorn else 14) - (0 if pose.kopf_vorn else 4)
+                p.setBrush(QColor('#8A4A22'))
+                for k in range(3):
+                    p.drawEllipse(QPointF(zx + seite * k * 2, y + 6 + k * 8), 5.5 - k * 0.6, 5)
+                p.setBrush(ROT)
+                p.drawEllipse(QPointF(zx + seite * 6, y + 28), 4, 3)
         # Haare und Ohren
         p.setBrush(QColor('#C2662D'))
         p.drawEllipse(QPointF(x - (0 if vorn else 8), y - 6), 22, 16)
@@ -427,6 +441,21 @@ class Wichtel:
             return
         if knick is not None:
             Wichtel.steife_muetze(p, x, y, knick, pose.wipp)
+            return
+        if maedchen:
+            haube = QPainterPath()
+            haube.moveTo(x - 23, y - 10)
+            haube.cubicTo(x - 23, y - 44, x + 23, y - 44, x + 23, y - 10)
+            haube.closeSubpath()
+            p.setBrush(linear(x - 20, y - 40, x + 20, y - 10, QColor('#F2A0C0'), QColor('#B8457A')))
+            p.drawPath(haube)
+            p.setPen(stift(QColor(255, 255, 255, 140), 1.5))
+            for dx in (-12, -4, 4, 12):
+                p.drawLine(QPointF(x + dx, y - 14), QPointF(x + dx * 0.7, y - 34))
+            p.setPen(KEIN_STIFT)
+            p.setBrush(WEISS)
+            p.drawRoundedRect(QRectF(x - 25, y - 17, 50, 9), 4.5, 4.5)
+            flausch(p, [(x + dx, y - 44 + dy) for dx, dy in ((0, 0), (-4, -3), (4, -3), (-3, 4), (4, 3))], 6, False)
             return
         # Zipfelmütze mit Glöckchen
         wipp = pose.wipp
@@ -968,3 +997,194 @@ class WichtelSteif(Wichtel):
     """Der Wichtel aus dem Running Gag: steife Mütze, deren Spitze abknickt (d.knick)."""
     KASTEN = QRectF(-75, -212, 150, 218)
     KOPF = (2, -206)
+
+
+# ---------------------------------------------------------------- Katze
+
+KATER = (QColor('#E8963E'), QColor('#B0601E'), QColor('#FFE9CC'))
+GRAU = (QColor('#A9ADB8'), QColor('#5E636E'), QColor('#F2F2F4'))
+
+
+class Katze:
+    """Getigerte Katze. d.fell: (hell, dunkel, Bauch), d.grummelig: halb geschlossene Augen
+    und Schmollmund, d.sitzt: sitzt aufrecht, d.buckel (0..1): Katzenbuckel mit gesträubtem Fell."""
+    KASTEN = QRectF(-82, -126, 172, 132)
+    KOPF = (40, -120)
+
+    @staticmethod
+    def zeichne(p, d):
+        pose, t = d.pose, d.t
+        hell, dunkel, bauch = getattr(d, 'fell', KATER)
+        sitzt = getattr(d, 'sitzt', False)
+        buckel = getattr(d, 'buckel', 0.0)
+        grummelig = getattr(d, 'grummelig', False)
+        wedel = math.sin(t * 2.5) * 8 + buckel * 20
+
+        def bein(x, winkel, hinten):
+            k = 125 if hinten else 100
+            p.save()
+            p.translate(x, -30)
+            p.rotate(winkel * 0.8)
+            p.setBrush(hell.darker(k))
+            p.drawRoundedRect(QRectF(-6, -4, 12, 32), 6, 6)
+            p.setBrush(bauch.darker(k))
+            p.drawEllipse(QRectF(-7, 22, 15, 8))
+            p.restore()
+
+        schwanz = QPainterPath()
+        if sitzt:
+            schwanz.moveTo(-26, -8)
+            schwanz.cubicTo(-56, -6, -60 + wedel * 0.3, -40, -44 + wedel * 0.5, -60)
+        else:
+            schwanz.moveTo(-36, -52)
+            schwanz.cubicTo(-62, -64 - buckel * 20, -64 + wedel, -96 - buckel * 10, -48 + wedel, -104)
+        p.setBrush(KEIN_PINSEL)
+        p.setPen(stift(hell.darker(110), 11 + 6 * buckel))
+        p.drawPath(schwanz)
+        p.setPen(stift(dunkel, 4))
+        p.drawPath(schwanz)
+        p.setPen(KEIN_STIFT)
+        if sitzt:
+            p.setBrush(radial(-6, -50, 60, hell.lighter(110), dunkel))
+            p.drawEllipse(QRectF(-34, -78, 60, 78))
+            p.setBrush(dunkel)
+            for k in range(3):
+                p.drawRoundedRect(QRectF(-30 + k * 6, -60 + k * 14, 12, 4), 2, 2)
+            p.setBrush(bauch)
+            p.drawEllipse(QRectF(4, -64, 22, 52))
+            p.setBrush(hell)
+            p.drawEllipse(QRectF(6, -10, 16, 10))
+            p.drawEllipse(QRectF(-14, -10, 16, 10))
+            kx, ky = 16, -88
+        else:
+            bein(-24, pose.bein_h, True)
+            bein(26, pose.bein_v, True)
+            p.setBrush(radial(0, -60 - buckel * 10, 60, hell.lighter(110), dunkel))
+            p.drawEllipse(QRectF(-44, -76 - buckel * 18, 90, 48 + buckel * 10))
+            p.setBrush(dunkel)
+            for k in range(4):
+                p.drawRoundedRect(QRectF(-26 + k * 14, -74 - buckel * 18, 5, 16), 2.5, 2.5)
+            p.setBrush(bauch)
+            p.drawEllipse(QRectF(-20, -44, 50, 14))
+            bein(-14, pose.bein_v, False)
+            bein(34, pose.bein_h, False)
+            kx, ky = 44, -84 - buckel * 8
+        for ox in (-12, 12):
+            ohr = QPainterPath()
+            ohr.moveTo(kx + ox - 9, ky - 12)
+            ohr.lineTo(kx + ox + (-4 if ox < 0 else 4), ky - 34 - buckel * 4)
+            ohr.lineTo(kx + ox + 9, ky - 12)
+            ohr.closeSubpath()
+            p.setBrush(hell.darker(105))
+            p.drawPath(ohr)
+            p.setBrush(QColor('#F4B6B6'))
+            p.drawEllipse(QPointF(kx + ox, ky - 20), 3, 6)
+        p.setBrush(radial(kx - 4, ky - 6, 28, hell.lighter(115), hell.darker(115)))
+        p.drawEllipse(QPointF(kx, ky), 22, 19)
+        p.setBrush(dunkel)
+        for dx in (-6, 0, 6):
+            p.drawRoundedRect(QRectF(kx + dx - 1.5, ky - 19, 3, 8), 1.5, 1.5)
+        p.setBrush(bauch)
+        p.drawEllipse(QPointF(kx, ky + 8), 11, 8)
+        bx = 0 if pose.kopf_vorn else 5
+        if grummelig and pose.schreck < 0.2:
+            for ax in (kx + bx - 8, kx + bx + 8):
+                p.setBrush(QColor('#C9D84A'))
+                p.drawEllipse(QPointF(ax, ky - 3), 4.5, 3)
+                p.setBrush(SCHWARZ)
+                p.drawRect(QRectF(ax - 1, ky - 5, 2, 4))
+                p.setBrush(hell.darker(115))
+                p.drawRect(QRectF(ax - 6, ky - 9, 12, 5))
+        else:
+            augen(p, (kx + bx - 8, kx + bx + 8), ky - 3, 4.6, 5.4, pose, (blick_x(pose) * 0.6, pose.blick_y), 0.55)
+        wangen(p, (kx + bx - 13, kx + bx + 13), ky + 5, 4)
+        p.setBrush(QColor('#E86A7A'))
+        nase = QPainterPath()
+        nase.moveTo(kx + bx - 3, ky + 3)
+        nase.lineTo(kx + bx + 3, ky + 3)
+        nase.lineTo(kx + bx, ky + 6)
+        p.drawPath(nase)
+        if pose.schreck > 0.2 or pose.mund_offen:
+            mund(p, kx + bx, ky + 10, 8, pose, QColor('#5A1A1A'))
+        else:
+            p.setPen(stift(SCHWARZ, 1.3))
+            p.setBrush(KEIN_PINSEL)
+            if grummelig:
+                p.drawArc(QRectF(kx + bx - 5, ky + 9, 10, 6), 20 * 16, 140 * 16)
+            else:
+                p.drawArc(QRectF(kx + bx - 5, ky + 4, 5, 5), 200 * 16, 140 * 16)
+                p.drawArc(QRectF(kx + bx, ky + 4, 5, 5), 200 * 16, 140 * 16)
+        p.setPen(stift(QColor(255, 255, 255, 200), 0.9))
+        for sx in (-1, 1):
+            for dy in (-2, 2):
+                p.drawLine(QPointF(kx + bx + sx * 8, ky + 6), QPointF(kx + bx + sx * 26, ky + 6 + dy * 2))
+        p.setPen(KEIN_STIFT)
+        if not sitzt or pose.arm_v < -20:
+            # Vorderpfote, die etwas anstupsen kann
+            p.save()
+            p.translate(kx - 8, ky + 22)
+            p.rotate(pose.arm_v * 0.9)
+            p.setBrush(hell)
+            p.drawRoundedRect(QRectF(-5, -2, 10, 26), 5, 5)
+            p.setBrush(bauch)
+            p.drawEllipse(QRectF(-6, 20, 12, 8))
+            p.restore()
+
+
+# ---------------------------------------------------------------- Frostfee
+
+
+class Frostfee:
+    """Kleine Frostfee im Kapuzenmantel mit Schneeflockenmuster; schwebt statt zu gehen."""
+    KASTEN = QRectF(-62, -178, 124, 184)
+    KOPF = (2, -172)
+
+    @staticmethod
+    def zeichne(p, d):
+        pose, t = d.pose, d.t
+        sw = math.sin(t * 3) * 5
+        p.translate(0, -12 - sw)
+        p.setBrush(radial(0, 8 + sw, 26, QColor(200, 240, 255, 140), QColor(200, 240, 255, 0)))
+        kreis(p, 0, 8 + sw, 26)
+        mantel = QPainterPath()
+        mantel.moveTo(-14, -98)
+        mantel.lineTo(14, -98)
+        mantel.cubicTo(28, -60, 36, -20, 32, 0)
+        for k in range(6):
+            mantel.quadTo(32 - (k + 0.5) * 64 / 6, 7 if k % 2 else -3, 32 - (k + 1) * 64 / 6, 0)
+        mantel.cubicTo(-36, -20, -28, -60, -14, -98)
+        p.setBrush(linear(-30, -90, 30, 0, QColor('#E9F7FF'), QColor('#6FB4DE')))
+        p.drawPath(mantel)
+        p.setBrush(QColor(255, 255, 255, 220))
+        for x, y, r in ((-12, -50, 4), (10, -34, 5), (-6, -18, 3.5), (16, -68, 3), (-18, -30, 3)):
+            stern(p, x, y, r)
+        flausch(p, [(x, -2) for x in range(-30, 31, 7)], 4.5, False)
+        for x, winkel in ((-12, pose.arm_h), (12, pose.arm_v)):
+            p.save()
+            p.translate(x, -88)
+            p.rotate(winkel)
+            p.setBrush(linear(-6, 0, 6, 0, QColor('#E9F7FF'), QColor('#7DBDE3')))
+            p.drawRoundedRect(QRectF(-6, -3, 12, 34), 6, 6)
+            p.setBrush(WEISS)
+            kreis(p, 0, 33, 5.5)
+            p.restore()
+        hy = -116
+        p.setBrush(linear(-26, hy - 30, 26, hy + 20, QColor('#E9F7FF'), QColor('#7DBDE3')))
+        p.drawEllipse(QPointF(0, hy - 2), 26, 27)
+        p.setBrush(QColor('#3A2A2E'))
+        p.drawEllipse(QPointF(0, hy - 2), 19, 20)
+        p.setBrush(radial(-3, hy - 2, 22, HAUT, HAUT_DUNKEL))
+        p.drawEllipse(QPointF(0, hy + 2), 17, 17)
+        p.setBrush(QColor('#3A2A2E'))
+        pony = QPainterPath()
+        pony.moveTo(-17, hy - 2)
+        pony.cubicTo(-14, hy - 22, 14, hy - 22, 17, hy - 2)
+        pony.cubicTo(8, hy - 10, -6, hy - 10, -17, hy - 2)
+        p.drawPath(pony)
+        bx = 0 if pose.kopf_vorn else 4
+        wangen(p, (bx - 9, bx + 9), hy + 7, 5)
+        augen(p, (bx - 6, bx + 6), hy + 1, 3.2, 3.8, pose, (blick_x(pose) * 0.5, pose.blick_y), 0.65)
+        mund(p, bx, hy + 10, 7, pose)
+        flausch(p, [(-26 + k * 8.7, hy - 26 + abs(k - 3) * 6) for k in range(7)], 4.5, False)
+        p.setBrush(QColor(255, 255, 255, 230))
+        stern(p, 0, hy - 30, 6)
