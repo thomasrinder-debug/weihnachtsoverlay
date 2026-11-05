@@ -1,108 +1,101 @@
 import math
+from dataclasses import replace
 
-from PyQt6.QtCore import QRectF
+from PyQt6.QtCore import QPointF, QRectF
 from PyQt6.QtGui import QColor, QPainterPath
 
 from zeichnen.figur import Pose
 from zeichnen.figuren import Katze
-from zeichnen.grundlagen import blinzeln, glatt
-from zeichnen.labor import zeichne_labortisch, zeichne_maus_geraet, zeichne_monitor
+from zeichnen.grundlagen import KEIN_PINSEL, blinzeln, glatt, stift
+from zeichnen.labor import zeichne_monitor
 from zeichnen.labor_e import zeichne_mauszeiger
 
-from .basis import Erschrecke, Falle, Gehe, Renne, Jeweils, Mit, Nebenbei, Schaue, Setze, Springe, Stehe, Tu, Warte, WarteNebenbei
-from .professor import ziehen
-from .prof_laptop import GeraetSzene, Hieb
+from .basis import Gehe, Jeweils, Mit, Nebenbei, Setze, Springe, Stehe, Tu, WarteNebenbei
+from .geraet import GeraetSzene, Solange
+from .professor import Publikumsblick
 
-G = 1.4
-TISCH_H = 76
-KATZE = 0.62
+G = 1.9
+KATZE = 0.8
+GROSS = 4.2            # Zeiger draußen: 21 Einheiten · 4,2 ≈ 0,35 H
 
 
 class Mauszeiger(GeraetSzene):
-    """Der Mauszeiger hängt, ein Hieb auf den Monitor, und der Zeiger springt aus dem Bildschirm.
-    Die Katze jagt ihn, er huscht zurück in den Schirm, die Katze springt hinterher und steckt
-    mit dem Vorderteil im Bildschirm fest und strampelt."""
+    """Die Katze verfolgt gebannt den Mauszeiger auf dem Monitor. Der Professor tippt dagegen,
+    der Zeiger springt heraus und wächst zu einem Riesenpfeil, der auf ihn zeigt. Die Katze
+    macht einen Buckel, duckt sich, der Zeiger flitzt zurück in den Schirm, die Katze springt
+    hinterher und steckt mit dem Vorderteil im Bildschirm, die Hinterbeine strampeln. Er zieht
+    sie heraus, plumpst hin, und sie trägt den Riesenzeiger quer im Maul davon. Der Monitor
+    hüpft beleidigt hinterher."""
     name, titel, reihenfolge = 'mauszeiger', 'Mäusejagd', 89
 
     def vorbereiten(self):
         r = self.seite = self.richtung
         s = self.s
-        self.tisch_x = self.vom_rand(0.13)
-        self.stand = self.tisch_x - r * 98 * s
-        self.zeiger = 'schirm'           # schirm, frei, aus
-        self.zx, self.zy = 0.0, -50.0    # auf dem Schirm: Monitor-Einheiten; frei: Weltpunkt
-        self.zg = 0.5
+        self.mon_x = self.vom_rand(0.09)
+        self.mon_hopp = 0.0
+        self.mon_dreh = 0.0
+        self.zeiger = 'schirm'           # schirm, frei, maul, weg
+        self.zx, self.zy = 0.0, -50.0    # schirm: Monitor-Einheiten; frei: Weltpunkt der Spitze
+        self.zg = 0.6
+        self.zw = 0.0
         self.beine = 0.0
-        self.zphase = 0.0
-        self.maus_dx = 0.0
-        self.bild_an = 1.0
-        self.kaputt = 0.0
         self.steckt = False
-        k = self.k = self.dazu('katze', Katze, groesse=KATZE)
-        k.sitzt = True
-        k.x = self.aussen(-r) - r * 60 * s
-        k.tempo = self.tempo * 1.1
+        self.zug = 0.0
+        k = self.k = self.dazu('katze', Katze, groesse=KATZE, vorn=True, sitzt=True, buckel=0.0)
+        k.x = self.mon_x + r * 98 * s
+        k.richtung = -r
+        k.tempo = self.tempo * 1.2
 
     # -- Orte
 
-    def monitor_ort(self):
-        return self.tisch_x + self.seite * 14 * self.s + self.zitter(), self.boden - (TISCH_H + 8) * self.s
-
     def am_monitor(self, lx, ly):
-        x, y = self.monitor_ort()
-        return x + lx * G * self.s, y + ly * G * self.s
+        return (self.mon_x + self.seite * 0 + lx * G * self.s + self.zitter(),
+                self.boden - self.mon_hopp + ly * G * self.s)
 
     def schirm_welt(self):
         x0, y0 = self.am_monitor(-27, -72)
         x1, y1 = self.am_monitor(27, -28)
         return QRectF(x0, y0, x1 - x0, y1 - y0)
 
-    def maus_ort(self):
-        return self.tisch_x - self.seite * (46 - self.maus_dx) * self.s, self.boden - (TISCH_H + 8) * self.s
-
-    def zeiger_welt(self):
-        if self.zeiger == 'schirm':
-            return self.am_monitor(self.zx, self.zy)
-        return self.zx, self.zy
-
     def katze_steckt_ort(self):
-        """Die Katze taucht von der Seite in den Schirm: Kopf und Vorderbeine drin."""
         q = self.schirm_welt()
         k = self.k
-        kopf_x = q.center().x() + self.seite * 20 * self.s
-        return kopf_x - k.richtung * 44 * k.s, q.center().y() + 62 * k.s
+        kopf_x = q.center().x() + self.seite * 8 * self.s + self.seite * self.zug * 10 * self.s
+        return kopf_x + self.seite * 44 * k.s, q.center().y() + 62 * k.s
+
+    def katze_hinten(self):
+        q = self.k.trafo().map(QPointF(-38, -52))
+        return q.x(), q.y()
+
+    def maul(self):
+        q = self.k.trafo().map(QPointF(50, -72))
+        return q.x(), q.y()
 
     def weiter(self, dt):
         super().weiter(dt)
-        if self.steckt and not self.erschreckt:
-            k = self.k
+        if self.erschreckt:
+            return
+        k = self.k
+        if self.steckt:
             k.x, k.y = self.katze_steckt_ort()
-            w = math.sin(self.t * 17)
-            k.pose = Pose(bein_v=50 * w, bein_h=-50 * w)
+            w = math.sin(self.t * 19)
+            k.pose = Pose(bein_v=55 * w, bein_h=-55 * w)
+        if self.zeiger == 'maul':
+            self.zx, self.zy = self.maul()
 
     # -- Zeichnen
 
     def zeichne_requisiten(self, p):
         s = self.s
+        x, y = self.am_monitor(0, 0)
         p.save()
-        p.translate(self.tisch_x, self.boden)
-        p.scale(s, s)
-        zeichne_labortisch(p, 140, TISCH_H)
-        p.restore()
-        mx, my = self.maus_ort()
-        p.save()
-        p.translate(mx, my)
-        p.scale(s * 1.3, s * 1.3)
-        zeichne_maus_geraet(p, 0, 0)
-        p.restore()
-        p.save()
-        p.translate(*self.monitor_ort())
+        p.translate(x, y)
         p.scale(G * s, G * s)
-        zeichne_monitor(p, 0, 0, self.bild_an, self.t, self.kaputt)
+        zeichne_monitor(p, 0, 0, 1.0, self.t, 0.0, dreh=self.mon_dreh * self.seite)
         p.restore()
         if self.zeiger == 'schirm':
-            x, y = self.zeiger_welt()
-            zeichne_mauszeiger(p, x, y, self.zg * G * s)
+            zx, zy = self.am_monitor(self.zx, self.zy)
+            zeichne_mauszeiger(p, zx, zy, self.zg * G * s)
 
     def zeichne_davor(self, p):
         s = self.s
@@ -118,31 +111,44 @@ class Mauszeiger(GeraetSzene):
             p.setClipPath(aussen.subtracted(innen))
             k.zeichne(p)
             p.restore()
-            p.save()                      # der Kopf leuchtet grünlich hinter dem Glas
+            p.save()                      # Kopf und Zeiger schimmern grünlich hinter dem Glas
             p.setClipPath(innen)
-            p.setOpacity(0.55)
+            p.setOpacity(0.5)
             k.zeichne(p)
+            zx, zy = self.am_monitor(-14 * self.seite + 5 * math.sin(self.t * 13), -62)
+            zeichne_mauszeiger(p, zx, zy, 2.2 * G * s, 20 * math.sin(self.t * 9))
             p.setOpacity(1.0)
             p.setBrush(QColor(90, 230, 150, 90))
             p.drawRect(q)
             p.restore()
             k.zeige_figur = False
-            # Wellenring, wo die Katze ins Glas taucht
-            p.setPen(QColor(220, 255, 235, 160))
-            p.setBrush(QColor(0, 0, 0, 0))
+            p.setPen(stift(QColor(220, 255, 235, 170), 1.5 * s))
+            p.setBrush(KEIN_PINSEL)
             rx = q.right() if self.seite > 0 else q.left()
-            w = 1 + 0.08 * math.sin(self.t * 9)
-            p.drawEllipse(QRectF(rx - 6 * s * w, q.center().y() - 20 * s * w, 12 * s * w, 40 * s * w))
+            w = 1 + 0.1 * math.sin(self.t * 9)
+            p.drawEllipse(QRectF(rx - 7 * s * w, q.center().y() - 26 * s * w, 14 * s * w, 52 * s * w))
             p.setPen(QColor(0, 0, 0, 0))
-        if self.zeiger == 'frei':
-            zeichne_mauszeiger(p, self.zx, self.zy, self.zg * s * G, 0.0, self.beine, self.zphase)
+        if self.zeiger in ('frei', 'maul'):
+            zeichne_mauszeiger(p, *self.zeiger_spitze(), self.zg * s, self.zw, self.beine, self.t * 14)
+
+    def zeiger_spitze(self):
+        """Weltpunkt der Pfeilspitze; im Maul liegt die Pfeilmitte zwischen den Zähnen."""
+        if self.zeiger != 'maul':
+            return self.zx, self.zy
+        w = math.radians(self.zw)
+        g = self.zg * self.s
+        mx, my = 6 * g, 11 * g
+        return (self.zx - (mx * math.cos(w) - my * math.sin(w)),
+                self.zy - (mx * math.sin(w) + my * math.cos(w)))
 
     def requisiten_kasten(self):
         s = self.s
-        k = QRectF(self.tisch_x - 80 * s, self.boden - (TISCH_H + 8 + 82 * G) * s, 160 * s,
-                   (TISCH_H + 8 + 82 * G) * s)
-        if self.zeiger == 'frei':
-            k = k.united(QRectF(self.zx - 10 * s, self.zy - 10 * s, 50 * s, 60 * s))
+        x, y = self.am_monitor(0, 0)
+        k = QRectF(x - 52 * G * s, y - 92 * G * s, 104 * G * s, 92 * G * s + self.mon_hopp)
+        if self.zeiger in ('frei', 'maul'):
+            zx, zy = self.zeiger_spitze()
+            g = self.zg * s
+            k = k.united(QRectF(zx - 30 * g, zy - 30 * g, 60 * g, 60 * g))
         if self.steckt:
             k = k.united(self.k.kasten().adjusted(-10 * s, -10 * s, 10 * s, 10 * s))
         return k
@@ -152,111 +158,203 @@ class Mauszeiger(GeraetSzene):
     def ablauf(self):
         r, s = self.richtung, self.s
         self.x = self.aussen(-r)
-        k_platz = self.tisch_x + r * 128 * s
-        p1 = self.tisch_x + r * 215 * s
-        p2 = self.tisch_x - r * 10 * s
+        k = self.k
+        stand = self.mon_x + r * 168 * s
+        boden_ziel = (self.mon_x + r * 66 * s, self.boden - 2 * s)
 
-        def maus_schieben(sz, u):
-            sz.maus_dx = 6 * math.sin(u * 2.4)
-            sz.zx = 18 * math.sin(u * 2.4)
-            sz.zy = -50 + 10 * math.sin(u * 3.7)
-            mx, my = sz.maus_ort()
-            sz.pose = Pose(arm_v=sz.arm_zu(mx, my - 4 * s), blick_y=0.1, auge_zu=blinzeln(sz.t))
-            kat = sz.k
-            kat.pose = Pose(blick_x=0.6 * math.sin(u * 2.4), auge_zu=blinzeln(sz.t, 1.3))
+        def gucken(sz, u):
+            sz.zx = 14 * math.sin(sz.t * 3.1)
+            sz.zy = -50 + 8 * math.sin(sz.t * 4.3)
+            k.pose = Pose(blick_x=0.7 * math.sin(sz.t * 3.1) * -r, blick_y=-0.6, auge_zu=blinzeln(sz.t, 1.3))
 
-        def ruetteln(sz, u):
-            sz.maus_dx = 5 * math.sin(u * 30)
-            mx, my = sz.maus_ort()
-            sz.pose = Pose(arm_v=sz.arm_zu(mx, my - 4 * s) + 4 * math.sin(u * 30), sorge=0.8, blick_y=0.1)
-
-        def getroffen(sz):
-            sz.kaputt = 0.5
-            sz.haare = 0.3
-            x, y = sz.zeiger_welt()
-            sz.zeiger, sz.zx, sz.zy = 'frei', x, y
-
-        def bogen(von, nach, hoehe, g0, g1, beine):
-            def f(sz, u, dauer):
-                a = glatt(min(1.0, u / dauer))
-                x0, y0 = von(sz) if callable(von) else von
-                x1, y1 = nach(sz) if callable(nach) else nach
-                sz.zx = x0 + (x1 - x0) * a
-                sz.zy = y0 + (y1 - y0) * a - hoehe * s * math.sin(a * math.pi)
-                sz.zg = g0 + (g1 - g0) * a
-                sz.beine = beine
-                sz.zphase += 0.5
-            return f
+        def tippen(sz, u):
+            gucken(sz, u)
+            sz.neigung = 26 * glatt(min(1.0, u / 0.2))
+            stoss = (u * 3.3) % 1 < 0.35 and u > 0.2
+            ziel = sz.am_monitor(0, -50)
+            ziel = (ziel[0] + r * (10 if stoss else 22) * s, ziel[1])
+            sz.pose = Pose(arm_v=sz.arm_zu(*ziel), arm_v_x=14, blick_y=0.2, auge_zu=blinzeln(sz.t))
+            if stoss:
+                sz.wackel = max(sz.wackel, 0.4)
 
         start = {}
 
-        def merken(sz):
-            start['p'] = (sz.zx, sz.zy)
+        def heraus(sz, u):
+            f = min(1.0, u / 0.35)
+            if 'p' not in start:
+                start['p'] = sz.am_monitor(sz.zx, sz.zy)
+                sz.zeiger = 'frei'
+                sz.neigung = 0
+            x0, y0 = start['p']
+            x1, y1 = boden_ziel
+            sz.zx = x0 + (x1 - x0) * f
+            sz.zy = y0 + (y1 - y0) * f - 70 * s * math.sin(f * math.pi) - 21 * sz.zg * s * f
+            sz.zg = 0.6 * G + (1.4 - 0.6 * G) * f
+            sz.zw = -r * 360 * f
+            sz.pose = Pose(arm_v=-60, schreck=0.8 * f, blick_y=0.4)
+            k.pose = Pose(blick_x=0.5 * r, blick_y=0.3 * f, schreck=0.5 * f)
 
-        raus = bogen(lambda sz: start['p'], (p1, self.boden - 22 * s), 110, 0.5, 1.5, 0.0)
-        flitz = bogen(lambda sz: start['p'], (p2, self.boden - 22 * s), 8, 1.5, 1.5, 1.0)
-        rein = bogen(lambda sz: start['p'], lambda sz: sz.am_monitor(4, -54), 70, 1.5, 0.5, 1.0)
+        def wachsen(sz, u):
+            stufe = min(2, int(u / 0.22))
+            v = (u - stufe * 0.22) / 0.22
+            g0 = (1.4, 2.4, 3.3)[stufe]
+            g1 = (2.4, 3.3, GROSS)[stufe]
+            sz.zg = g0 + (g1 - g0) * min(1.0, v * 2.5) * (1 + 0.25 * math.sin(min(1.0, v * 2.5) * math.pi))
+            sz.zw = 0.0
+            sz.zx, sz.zy = boden_ziel[0], sz.boden - 21 * sz.zg * s
+            sz.pose = Pose(arm_v=-150, arm_h=-130, arm_v_x=16, schreck=1.0, sorge=1.0)
+            sz.x = stand + r * 36 * s * glatt(min(1.0, u / 0.66))
+            k.sitzt = False
+            k.buckel = min(1.0, u * 3)
+            k.striche = u > 0.3
+            k.pose = Pose(schreck=1.0, kopf_vorn=True)
 
-        def zurueck_auf_schirm(sz):
-            sz.zeiger, sz.zx, sz.zy, sz.zg = 'schirm', 4, -54, 0.5
+        def zeigen(sz, u):
+            # der Riesenpfeil kippt und zeigt auf den Professor
+            f = glatt(min(1.0, u / 0.3))
+            sz.zw = -r * 62 * f
+            sz.beine = 1.0
+            sz.zx = boden_ziel[0] + r * 30 * s * f
+            sz.zy = sz.boden - 60 * s - 20 * s * f
+            sz.hopp = 18 * s * math.sin(min(1.0, u / 0.25) * math.pi)
+            sz.pose = Pose(arm_v=-170, arm_h=-160, arm_v_x=16, schreck=1.0, sorge=1.0, kopf_vorn=True,
+                           bein_v=-20, bein_h=10)
+            sz.haare = 0.6
+
+        def lauern(sz, u):
+            k.buckel = 0.0
+            k.striche = False
+            k.stauchen = 0.82
+            k.hopp = -4 * s
+            k.neigung = -6 * math.sin(u * 30)
+            k.pose = Pose(bein_v=-20, bein_h=24, blick_y=0.2)
+            sz.pose = Pose(arm_v=-150, arm_h=-140, arm_v_x=16, sorge=1.0, kopf_vorn=False, blick_y=0.4)
+            sz.zx = boden_ziel[0] + r * 30 * s + 4 * s * math.sin(u * 40)
+
+        def zurueck(sz, u):
+            f = min(1.0, u / 0.25)
+            if 'q' not in start:
+                start['q'] = (sz.zx, sz.zy, sz.zg)
+                k.stauchen, k.hopp, k.neigung = 1.0, 0.0, 0.0
+            x0, y0, g0 = start['q']
+            x1, y1 = sz.am_monitor(-6 * r, -60)
+            sz.zx = x0 + (x1 - x0) * f
+            sz.zy = y0 + (y1 - y0) * f - 40 * s * math.sin(f * math.pi)
+            sz.zg = g0 + (2.2 * G - g0) * f
+            sz.zw = -r * 62 * (1 - f)
+            if f >= 1:
+                sz.zeiger = 'weg'
 
         def steckt(sz):
             sz.steckt = True
-            sz.k.zeige_figur = False
-            sz.k.neigung = 12
+            k.zeige_figur = False
+            k.neigung = -14
             sz.wackel = 1.0
+            sz.streue(*sz.am_monitor(0, -50), 10, [QColor(150, 255, 190), QColor(230, 255, 240)], tempo=150,
+                      dauer=0.5, r=(3, 6), art='stern')
 
-        def frech(sz, u):
-            q = 14 + 4 * math.sin(u * 5)
-            sz.zx = -sz.seite * q
-            sz.zy = -40 - 3 * abs(math.sin(u * 7))
+        def hin(sz, u):
+            hx, hy = sz.katze_hinten()
+            sz.pose = Pose(arm_v=sz.arm_zu(hx, hy), arm_h=sz.arm_zu(hx, hy, False), arm_v_x=14, sorge=0.6,
+                           blick_y=0.4, auge_zu=blinzeln(sz.t))
+
+        def ziehen(staerke, dauer):
+            def f(sz, u):
+                v = min(1.0, u / dauer)
+                ruck = math.sin(v * math.pi)
+                sz.zug = ruck * (0.3 + 0.7 * staerke)
+                sz.mon_dreh = 9 * ruck * staerke
+                sz.neigung = -(8 + 16 * staerke) * ruck
+                hx, hy = sz.katze_hinten()
+                sz.pose = Pose(arm_v=sz.arm_zu(hx, hy), arm_h=sz.arm_zu(hx, hy, False), arm_v_x=14,
+                               bein_v=-30 * ruck, bein_h=22 * ruck, sorge=1.0, mund_offen=ruck > 0.5,
+                               auge_zu=ruck > 0.6)
+                nx, _ = sz.hand(True)
+                sz.x += hx - nx
+            return f
+
+        def plopp(sz):
+            sz.steckt = False
+            sz.zug, sz.mon_dreh = 0.0, 0.0
+            k.zeige_figur, k.neigung = True, 0.0
+            k.pose = Pose()
+            sz.zeiger, sz.zg, sz.zw, sz.beine = 'maul', GROSS, 90 * r, 0.0
+            sz.zx, sz.zy = sz.maul()
+            sz.wackel = 1.0
+            sz.streue(sz.schirm_welt().center().x() + r * 30 * s, sz.schirm_welt().center().y(), 12,
+                      [QColor(150, 255, 190), QColor(230, 255, 240)], tempo=200, dauer=0.5, r=(3, 6), art='stern')
+
+        def plumps(sz, u):
+            f = min(1.0, u / 0.35)
+            if 'x' not in start:
+                start['x'] = sz.x
+            sz.x = start['x'] + r * 40 * s * (1 - (1 - f) ** 2)
+            sz.neigung = -30 * math.sin(f * math.pi) - 8 * f
+            sz.hopp = 30 * s * math.sin(f * math.pi) - 52 * s * f ** 3
+            sz.pose = Pose(arm_v=-140, arm_h=-120, arm_v_x=14, kopf_vorn=True, schreck=1.0, mund_offen=True,
+                           bein_v=-115 * f, bein_h=-95 * f)
+
+        def sitzen(sz, u):
+            return Pose(arm_v=-60, arm_h=-40, bein_v=-115 + 12 * math.sin(u * 9), bein_h=-95, kopf_vorn=u > 0.45, auge_zu=0.6 < u < 0.75,
+                        sorge=0.4, blick_x=-0.6 * r if u < 0.45 else 0.0)
+
+        def aufstehen(sz, u):
+            f = glatt(min(1.0, u / 0.3))
+            sz.hopp = -52 * s * (1 - f)
+            sz.neigung = -8 * (1 - f)
+            sz.pose = Pose(bein_v=-115 * (1 - f), bein_h=-95 * (1 - f), arm_v=-60, sorge=0.5)
+
+        def monitor_huepft(sz, u):
+            phase = (u * 2.6) % 1
+            sz.mon_hopp = 26 * s * math.sin(phase * math.pi)
+            sz.mon_x -= r * sz.tempo * 1.25 * min(1.0, u / 0.3) / 60
+            sz.mon_dreh = -6 * math.sin(phase * math.pi)
+
+        def verblueffte_haltung(pose, sz):
+            return replace(pose, arm_v=-100, arm_v_x=16, sorge=0.7)
 
         return [
-            Nebenbei(Warte(0.4), Mit('katze', Gehe(bis=k_platz)), Mit('katze', Setze(richtung=-r))),
-            Gehe(bis=self.stand),
-            Setze(neigung=12),
-            Jeweils(3.0, maus_schieben),
-            Setze(zx=4, zy=-54),
-            Jeweils(1.0, ruetteln),
-            Setze(neigung=0),
-            Schaue(0.8),
-            Setze(richtung=r),
-            Hieb(lambda sz: sz.am_monitor(0, -78), getroffen),
-            Mit('katze', Setze(sitzt=False, richtung=r)),
-            Tu(merken),
-            Jeweils(0.6, lambda sz, u: raus(sz, u, 0.6)),
-            Mit('katze', Stehe(0.5, lambda d, u: Pose(bein_v=-10, bein_h=10, hub=4))),
-            Setze(beine=1.0),
-            Nebenbei(Mit('katze', Springe(nach=(p1 - r * 40 * s, self.boden), dauer=0.6, hoehe=60))),
-            Warte(0.3),
-            Tu(merken),
-            Jeweils(0.8, lambda sz, u: flitz(sz, u, 0.8)),
-            WarteNebenbei(),
-            Nebenbei(Mit('katze', Gehe(bis=p2 + r * 120 * s, tempo=2.4))),
-            Tu(merken),
-            Jeweils(0.6, lambda sz, u: rein(sz, u, 0.6)),
-            Tu(zurueck_auf_schirm),
-            WarteNebenbei(),
-            Mit('katze', Setze(richtung=-r)),
-            Mit('katze', Springe(nach=lambda d: d.sz.katze_steckt_ort(), dauer=0.45, hoehe=50)),
+            Nebenbei(Solange(gucken, lambda sz: sz.zeiger != 'schirm')),
+            Gehe(bis=stand, tempo=2.2),
+            Setze(richtung=-r),
+            Jeweils(0.7, tippen),
+            Jeweils(0.35, heraus),
+            Jeweils(0.66, wachsen),
+            Jeweils(0.4, zeigen),
+            Setze(hopp=0.0),
+            Jeweils(0.35, lauern),
+            Jeweils(0.25, zurueck),
+            Mit('katze', Springe(nach=lambda d: d.sz.katze_steckt_ort(), dauer=0.3, hoehe=40)),
             Tu(steckt),
-            Stehe(1.2, lambda sz, u: Pose(schreck=0.6, sorge=1.0, arm_v=-60, arm_h=-40)),
-            Jeweils(1.8, frech),
-            Schaue(1.4),
-            Stehe(0.9, lambda sz, u: Pose(kopf_vorn=True, arm_v=-120, arm_h=-120, arm_v_x=16, sorge=0.6,
-                                          auge_zu=blinzeln(sz.t))),
-            Setze(mitnehmen=('tisch_x',)),
-            Gehe(bis=self.aussen(-r) - r * 300 * s, haltung=ziehen),
+            Publikumsblick(0.8, husten=False),
+            Setze(haare=0.3),
+            Gehe(bis=lambda sz: sz.katze_hinten()[0] + r * 62 * s, tempo=1.0),
+            Setze(richtung=-r),
+            Jeweils(0.15, hin),
+            Jeweils(0.45, ziehen(0.2, 0.45)),
+            Jeweils(0.4, ziehen(0.6, 0.4)),
+            Jeweils(0.3, ziehen(1.0, 0.6)),
+            Tu(plopp),
+            Nebenbei(Mit('katze', Springe(nach=lambda d: (d.x + r * 60 * s, d.sz.boden), dauer=0.4, hoehe=50)),
+                     Mit('katze', Stehe(0.35, lambda d, u: Pose(kopf_vorn=True, blick_x=0.0))),
+                     Mit('katze', Gehe(tempo=1.3))),
+            Jeweils(0.4, plumps),
+            Stehe(0.8, sitzen),
+            Nebenbei(Solange(monitor_huepft, lambda sz: (sz.mon_x - sz.aussen(-r)) * -r > 0)),
+            Jeweils(0.3, aufstehen),
+            Setze(hopp=0.0, neigung=0.0),
+            Gehe(tempo=1.5, haltung=verblueffte_haltung),
+            WarteNebenbei(),
         ]
 
     def schreck_ablauf(self):
-        if not self.steckt:
-            return self.schreck_rennen()
-        # die Katze plumpst aus dem Schirm, hüpft und rennt
-        self.steckt = False
         k = self.k
-        k.zeige_figur, k.neigung = False, 0.0
-        neu = self.schreck_rennen()
-        k.zeige_figur = True
-        return [Nebenbei(Mit('katze', Erschrecke(0.25, 20)), Mit('katze', Falle(lambda d: d.y >= d.sz.boden)),
-                         Mit('katze', Setze(y=self.boden)), Mit('katze', Renne(zum='rand')))] + neu
+        if self.steckt:
+            self.steckt = False
+            k.x += self.seite * 30 * self.s
+        k.zeige_figur = k.figur_sichtbar()
+        k.sitzt, k.buckel, k.striche, k.stauchen, k.hopp, k.neigung = False, 0.0, False, 1.0, 0.0, 0.0
+        k.y = self.boden
+        self.zeiger = 'weg'
+        self.neigung, self.hopp = 0.0, 0.0
+        return self.schreck_rennen()

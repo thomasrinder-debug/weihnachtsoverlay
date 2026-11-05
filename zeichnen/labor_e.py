@@ -1,5 +1,5 @@
-"""Requisiten für die Computer-Szenen des Professors (Gruppe E): Laptop, Drucker mit
-Papier, Mauszeiger, Eisblock, Schraubstock und der Monitor als Ziehharmonika.
+"""Requisiten für die Computer-Szenen des Professors (Gruppe E): Drucker mit Papier,
+wandelnde Schuhe, Mauszeiger, Eisblock.
 
 Alle in Zeichen-Einheiten, Boden mittig im Ursprung, wie in labor.py.
 """
@@ -7,192 +7,15 @@ import math
 import random
 
 from PyQt6.QtCore import QPointF, QRectF
-from PyQt6.QtGui import QColor, QPainterPath, QTransform
+from PyQt6.QtGui import QColor, QPainterPath
 
 from .grundlagen import *  # noqa: F401,F403  Farben und Hilfen
-from .labor import METALL, METALL_DUNKEL, zeichne_monitor
-from .professor import HANDSCHUH, HANDSCHUH_DUNKEL, KITTEL, KITTEL_SCHATTEN
+from .professor import HANDSCHUH, HANDSCHUH_DUNKEL, HOSE, KITTEL, KITTEL_SCHATTEN, SCHUH
 
-SILBER = QColor('#C9CED6')
-SILBER_DUNKEL = QColor('#7D848F')
-GRAU_DUNKEL = QColor('#3A3E46')
 PAPIER = QColor('#FBFBF7')
 PAPIER_SCHATTEN = QColor('#D9DBE0')
 EIS_HELL = QColor(225, 245, 255, 150)
 EIS_DUNKEL = QColor(140, 200, 235, 170)
-SCHRAUB_BLAU = QColor('#3F6EA6')
-SCHRAUB_BLAU_DUNKEL = QColor('#22446E')
-
-
-# ---------------------------------------------------------------- Laptop
-
-def _laptop_deckel_zu(p, f):
-    """Rückseite des zugeklappten Deckels über der Tastatur (f: 0 hochkant .. 1 ganz zu)."""
-    tief = -14 + 11 * f
-    pfad = QPainterPath()
-    pfad.moveTo(-33, -14)
-    pfad.lineTo(33, -14)
-    pfad.lineTo(33 + 5 * f, tief)
-    pfad.lineTo(-33 - 5 * f, tief)
-    pfad.closeSubpath()
-    p.setBrush(linear(0, -14, 0, tief + 1, SILBER.lighter(110), SILBER_DUNKEL))
-    p.drawPath(pfad)
-    if f > 0.6:
-        p.setBrush(QColor(255, 255, 255, 120))
-        p.drawRect(QRectF(-30, -13.5, 26, 1.2))
-        p.setBrush(QColor('#E3A928'))
-        stern(p, 0, (tief - 14) / 2, 2.6)
-
-
-def zeichne_laptop(p, x, y, deckel=1.0, bild=1.0, t=0.0, fehler=0.0, kaputt=0.0, nur_deckel=False):
-    """Klapprechner von vorn, Unterkante mittig bei (x, y). deckel 1 = offen, 0 = zu;
-    fehler 0..1: Schirm blinkt rot, kaputt 0..1: Sprünge und dunkler Schirm."""
-    p.setPen(KEIN_STIFT)
-    p.save()
-    p.translate(x, y)
-    if not nur_deckel:
-        p.setBrush(QColor(0, 0, 0, 45))
-        p.drawEllipse(QRectF(-42, -2, 84, 5))
-        p.setBrush(linear(0, -4, 0, 0, SILBER_DUNKEL, GRAU_DUNKEL))
-        p.drawRoundedRect(QRectF(-39, -5, 78, 5), 2, 2)
-        oben = QPainterPath()
-        oben.moveTo(-38, -4)
-        oben.lineTo(38, -4)
-        oben.lineTo(32, -14)
-        oben.lineTo(-32, -14)
-        oben.closeSubpath()
-        p.setBrush(linear(0, -14, 0, -4, SILBER.darker(105), SILBER.lighter(112)))
-        p.drawPath(oben)
-        p.setBrush(QColor('#4A4E58'))
-        for reihe in range(3):
-            v = (reihe + 0.5) / 3.6
-            yy = -13 + v * 7
-            halb = 29 + 5 * v
-            n = 11
-            for k in range(n):
-                xx = -halb + (k + 0.15) * 2 * halb / n
-                p.drawRect(QRectF(xx, yy, 2 * halb / n * 0.7, 1.6))
-        p.setBrush(SILBER.darker(118))
-        p.drawRoundedRect(QRectF(-8, -6.8, 16, 2.4), 1, 1)
-    if deckel > 0.15:
-        f = (deckel - 0.15) / 0.85
-        oben_y = -14 - 52 * f
-        aussen = QRectF(-33, oben_y, 66, -14 - oben_y)
-        p.setBrush(linear(-33, oben_y, 33, -14, QColor('#5A5F6A'), QColor('#2B2E35')))
-        p.drawRoundedRect(aussen, 3, 3)
-        if f > 0.25:
-            schirm = aussen.adjusted(3.5, 3.5, -3.5, -4)
-            an = bild * (1 - kaputt * 0.85)
-            rot = fehler * (0.5 + 0.5 * math.sin(t * 14))
-            p.setBrush(QColor('#14181E'))
-            p.drawRect(schirm)
-            if an > 0:
-                innen = QColor(int(110 + 145 * rot), int(190 - 140 * rot), int(255 - 200 * rot), int(230 * an))
-                aus = QColor(int(30 + 120 * rot), int(70 - 40 * rot), int(140 - 100 * rot), int(220 * an))
-                p.setBrush(radial(schirm.center().x() - 8, schirm.top() + 10, 46, innen, aus))
-                p.drawRect(schirm)
-                if fehler > 0:
-                    # großes Warndreieck ohne Text
-                    m = schirm.center()
-                    d = QPainterPath()
-                    d.moveTo(m.x(), m.y() - 12)
-                    d.lineTo(m.x() + 13, m.y() + 10)
-                    d.lineTo(m.x() - 13, m.y() + 10)
-                    d.closeSubpath()
-                    p.setBrush(QColor(255, 230, 90, int(255 * an * (0.4 + 0.6 * rot))))
-                    p.drawPath(d)
-                    p.setBrush(QColor(60, 20, 10, int(255 * an)))
-                    p.drawRoundedRect(QRectF(m.x() - 1.6, m.y() - 5, 3.2, 9), 1.2, 1.2)
-                    kreis(p, m.x(), m.y() + 7, 1.7)
-            p.setBrush(QColor(255, 255, 255, 40))
-            gl = QPainterPath()
-            gl.moveTo(schirm.left(), schirm.top())
-            gl.lineTo(schirm.left() + schirm.width() * 0.45, schirm.top())
-            gl.lineTo(schirm.left(), schirm.top() + schirm.height() * 0.7)
-            gl.closeSubpath()
-            p.drawPath(gl)
-            if kaputt > 0:
-                _spruenge(p, schirm.center().x(), schirm.center().y(), kaputt, 9)
-        p.setBrush(QColor(255, 255, 255, 70))
-        p.drawRect(QRectF(-31, oben_y + 1, 62, 1))
-    else:
-        _laptop_deckel_zu(p, (0.15 - deckel) / 0.15)
-    p.restore()
-
-
-def _spruenge(p, cx, cy, staerke, saat, weite=12):
-    p.setPen(stift(QColor(240, 250, 255, 230), 1.1))
-    p.setBrush(KEIN_PINSEL)
-    z = random.Random(saat)
-    for _ in range(int(3 + 5 * staerke)):
-        q = QPointF(cx, cy)
-        w = z.uniform(0, 2 * math.pi)
-        for _ in range(3):
-            w += z.uniform(-0.7, 0.7)
-            n = q + QPointF(math.cos(w) * weite * 0.6, math.sin(w) * weite * 0.6)
-            p.drawLine(q, n)
-            q = n
-    p.setPen(KEIN_STIFT)
-
-
-def zeichne_laptop_klein(p, x, y, winkel=0.0, kappe=False):
-    """Zugeklappter Laptop als flache Platte, etwa unter dem Arm; Mitte bei (x, y)."""
-    p.setPen(KEIN_STIFT)
-    p.save()
-    p.translate(x, y)
-    p.rotate(winkel)
-    p.setBrush(linear(0, -5, 0, 5, SILBER.lighter(108), SILBER_DUNKEL))
-    p.drawRoundedRect(QRectF(-30, -4, 60, 8), 2.5, 2.5)
-    p.setBrush(GRAU_DUNKEL)
-    p.drawRect(QRectF(-29, 0.5, 58, 1))
-    p.setBrush(QColor('#E3A928'))
-    stern(p, 8, -1.5, 2.4)
-    if kappe:
-        zeichne_kappe(p, (-22, -3), (2, -3), (-28, -26), 0.7)
-    p.restore()
-
-
-# ---------------------------------------------------------------- Mütze, frei gezogen
-
-def zeichne_kappe(p, links, rechts, bommel, s=1.0, dick=1.0, teile='krb', zug=None):
-    """Weihnachtsmütze als Gummizipfel: Rand von links nach rechts, Spitze mit Bommel
-    beim Punkt bommel. Punkte in den aktuellen Koordinaten, s: Größe des Randes.
-    teile: k = Körper, r = Rand, b = Bommel (für getrenntes Zeichnen vor und hinter der Figur);
-    zug: Punkt, über den der Zipfel im Bogen läuft (etwa vor dem Gesicht vorbei)."""
-    lx, ly = links
-    rx, ry = rechts
-    bx, by = bommel
-    mx, my = (lx + rx) / 2, (ly + ry) / 2
-    nx, ny = -(ry - ly), rx - lx          # zeigt vom Rand weg (zur Spitze hin, wenn Spitze "oben")
-    nl = math.hypot(nx, ny) or 1.0
-    if (bx - mx) * nx + (by - my) * ny < 0:
-        nx, ny = -nx, -ny
-    nx, ny = nx / nl, ny / nl
-    hoch = 22 * s * dick
-    pfad = QPainterPath()
-    pfad.moveTo(lx, ly)
-    pfad.lineTo(rx, ry)
-    pfad.cubicTo(rx + nx * hoch, ry + ny * hoch, (rx + bx) / 2 + nx * hoch * 0.6, (ry + by) / 2 + ny * hoch * 0.6,
-                 bx, by)
-    pfad.cubicTo((lx + bx) / 2 + nx * hoch * 0.3, (ly + by) / 2 + ny * hoch * 0.3, lx + nx * hoch * 0.4,
-                 ly + ny * hoch * 0.4, lx, ly)
-    if zug is not None:
-        zx, zy = zug
-        ix, iy = zx + (mx - zx) * 0.3 + (bx - zx) * 0.12, zy + (my - zy) * 0.3 + (by - zy) * 0.12
-        pfad = QPainterPath()
-        pfad.moveTo(lx, ly)
-        pfad.cubicTo(lx + (zx - lx) * 0.3, ly - 16 * s, zx, zy, bx, by)
-        pfad.cubicTo(ix, iy, rx + (ix - rx) * 0.3, ry - 4 * s, rx, ry)
-        pfad.closeSubpath()
-    p.setPen(KEIN_STIFT)
-    if 'k' in teile:
-        p.setBrush(linear(bx, by, mx, my, ROT_HELL, ROT_DUNKEL))
-        p.drawPath(pfad)
-    if 'r' in teile:
-        n = max(2, int(math.hypot(rx - lx, ry - ly) / (6 * s)))
-        flausch(p, [(lx + (rx - lx) * k / n, ly + (ry - ly) * k / n) for k in range(n + 1)], 6 * s)
-    if 'b' in teile:
-        flausch(p, [(bx + dx * s, by + dy * s) for dx, dy in ((0, 0), (-3, -3), (3, -3), (-3, 3), (3, 3))], 5 * s)
 
 
 # ---------------------------------------------------------------- Drucker und Papier
@@ -351,6 +174,36 @@ def zeichne_winkehand(p, x, y, winkel, laenge=30):
     p.restore()
 
 
+def zeichne_schuhe(p, x, y, hoehe, phase=0.0, richtung=1):
+    """Zwei Hosenbeine mit Schuhen, die unter einem Haufen hervorschauen und schlurfen.
+    Boden mittig bei (x, y), Beine hoehe Einheiten sichtbar, Spitzen zur Seite richtung."""
+    if hoehe <= 0:
+        return
+    p.setPen(KEIN_STIFT)
+    p.save()
+    p.translate(x, y)
+    p.scale(richtung, 1)
+    for k, versatz in enumerate((-15, 13)):
+        sw = math.sin(phase + k * math.pi)
+        fx = versatz + 9 * sw
+        fy = -5 * max(0.0, sw)
+        d = 125 if k == 0 else 100
+        p.setBrush(linear(fx - 7, 0, fx + 7, 0, HOSE.lighter(130).darker(d), HOSE.darker(140).darker(d)))
+        p.drawRoundedRect(QRectF(fx - 7, -hoehe - 8, 14, hoehe + 2 + fy), 5, 5)
+        schuh = QPainterPath()
+        schuh.moveTo(fx - 9, fy - 10)
+        schuh.cubicTo(fx - 10, fy, fx - 4, fy, fx + 6, fy)
+        schuh.cubicTo(fx + 18, fy, fx + 24, fy - 2, fx + 24, fy - 6)
+        schuh.cubicTo(fx + 24, fy - 11, fx + 14, fy - 13, fx + 8, fy - 13)
+        schuh.lineTo(fx - 7, fy - 13)
+        schuh.closeSubpath()
+        p.setBrush(linear(0, fy - 13, 0, fy, SCHUH.lighter(130).darker(d), SCHUH.darker(150).darker(d)))
+        p.drawPath(schuh)
+        p.setBrush(QColor('#2A1A10').darker(d))
+        p.drawRoundedRect(QRectF(fx - 10, fy - 2.5, 35, 3), 1.5, 1.5)
+    p.restore()
+
+
 # ---------------------------------------------------------------- Mauszeiger
 
 def zeichne_mauszeiger(p, x, y, groesse=1.0, winkel=0.0, beine=0.0, phase=0.0):
@@ -425,133 +278,3 @@ def zeichne_eisblock(p, x, y, b, h, anteil=1.0, rampe=1, t=0.0):
         if w < 0.3:
             stern(p, -b / 2 + 10 + (k * 37) % (b - 10), -hh * (0.2 + 0.2 * k), 3 * math.sin(w / 0.3 * math.pi))
     p.restore()
-
-
-def rampen_punkt(x, y, b, h, u, rampe=1):
-    """Punkt auf der Rampe des Eisblocks (u 0 = oben am Blockrand, 1 = unten am Boden), in Einheiten
-    relativ zu (x, y) wie zeichne_eisblock."""
-    p0 = (b / 2 + 2, -h + 6)
-    c1 = (b / 2 + h * 0.25, -h * 0.55)
-    c2 = (b / 2 + h * 0.55, -4)
-    p1 = (b / 2 + h * 0.9, 0)
-    a = 1 - u
-    px = a ** 3 * p0[0] + 3 * a * a * u * c1[0] + 3 * a * u * u * c2[0] + u ** 3 * p1[0]
-    py = a ** 3 * p0[1] + 3 * a * a * u * c1[1] + 3 * a * u * u * c2[1] + u ** 3 * p1[1]
-    return x + rampe * px, y + py
-
-
-# ---------------------------------------------------------------- Schraubstock und Ziehharmonika
-
-SCHRAUB_OBEN = -84       # Oberkante der Gleitbahn, auf der das Gerät steht
-
-
-def zeichne_schraubstock(p, x, y, spalt, kurbel=0.0, hinten=True):
-    """Schraubstock auf Rollständer, Boden mittig bei (x, y). Die feste Backe innen bei x - 46,
-    die bewegliche bei x - 46 + spalt. hinten=True: Ständer und Bahn, False: die Backen davor."""
-    p.setPen(KEIN_STIFT)
-    p.save()
-    p.translate(x, y)
-    links = -46
-    rechts = links + spalt
-    if hinten:
-        p.setBrush(QColor(0, 0, 0, 45))
-        p.drawEllipse(QRectF(-44, -3, 88, 6))
-        p.setBrush(linear(-30, 0, 30, 0, METALL_DUNKEL, QColor('#3E444C')))
-        p.drawRoundedRect(QRectF(-34, -12, 68, 6), 2, 2)
-        for rx in (-28, 28):
-            p.setBrush(QColor('#26292E'))
-            kreis(p, rx, -4, 4)
-            p.setBrush(METALL)
-            kreis(p, rx, -4, 1.5)
-        p.setBrush(linear(-5, 0, 5, 0, METALL, METALL_DUNKEL))
-        p.drawRect(QRectF(-5, -72, 10, 62))
-        p.setBrush(linear(0, SCHRAUB_OBEN, 0, SCHRAUB_OBEN + 12, SCHRAUB_BLAU.lighter(120), SCHRAUB_BLAU_DUNKEL))
-        p.drawRoundedRect(QRectF(links - 14, SCHRAUB_OBEN, 118, 12), 3, 3)
-        p.restore()
-        return
-    # feste Backe
-    for bx, seite in ((links, -1), (rechts, 1)):
-        x0 = bx - 13 if seite < 0 else bx
-        p.setBrush(linear(x0, 0, x0 + 13, 0, SCHRAUB_BLAU.lighter(115), SCHRAUB_BLAU_DUNKEL))
-        p.drawRoundedRect(QRectF(x0, SCHRAUB_OBEN - 30, 13, 32), 3, 3)
-        p.setBrush(METALL)
-        bk = QRectF(bx - 3 if seite < 0 else bx, SCHRAUB_OBEN - 28, 3, 24)
-        p.drawRect(bk)
-        p.setBrush(METALL_DUNKEL)
-        for k in range(6):
-            p.drawRect(QRectF(bk.left(), bk.top() + 2 + k * 4, 3, 1))
-    # Spindel und Knebel an der beweglichen Backe
-    sx = rechts + 13
-    p.setBrush(linear(0, SCHRAUB_OBEN - 18, 0, SCHRAUB_OBEN - 12, METALL.lighter(110), METALL_DUNKEL))
-    p.drawRect(QRectF(sx, SCHRAUB_OBEN - 18, 22, 6))
-    p.setPen(stift(METALL_DUNKEL, 0.8))
-    for k in range(5):
-        gx = sx + 2 + k * 4 + (kurbel * 4 / (2 * math.pi)) % 4
-        p.drawLine(QPointF(gx, SCHRAUB_OBEN - 18), QPointF(gx + 1.5, SCHRAUB_OBEN - 12))
-    p.setPen(KEIN_STIFT)
-    kx = sx + 24
-    ky = SCHRAUB_OBEN - 15
-    lang = 16 * math.cos(kurbel)
-    p.setBrush(linear(kx - 3, 0, kx + 3, 0, METALL.lighter(115), METALL_DUNKEL))
-    p.drawRoundedRect(QRectF(kx - 3, ky - 6, 6, 12), 2, 2)
-    p.setPen(stift(METALL_DUNKEL, 3.2))
-    p.drawLine(QPointF(kx, ky - lang), QPointF(kx, ky + lang))
-    p.setPen(KEIN_STIFT)
-    p.setBrush(QColor('#C0392B'))
-    kreis(p, kx, ky - lang, 3.2)
-    kreis(p, kx, ky + lang, 3.2)
-    p.restore()
-
-
-def kurbel_griff(x, y, spalt, kurbel, s):
-    """Weltpunkt des oberen Knebelknaufs zu zeichne_schraubstock bei (x, y) in Weltkoordinaten."""
-    kx = -46 + spalt + 13 + 24
-    return x + kx * s, y + (SCHRAUB_OBEN - 15 - 16 * math.cos(kurbel)) * s
-
-
-def zeichne_harmonika(p, x_links, y, quetsch=0.0, t=0.0, bild=1.0, flackern=True, falten=6, kaputt=0.0):
-    """Röhrenmonitor, quer zur Ziehharmonika zusammengedrückt. Linke Gehäusekante bei x_links,
-    Fuß bei y; quetsch 0 = normal, 1 = auf ein Drittel gefaltet. Ein heller Flimmerbalken läuft
-    über alle Falten weiter."""
-    breite0 = 68.0
-    w0 = breite0 / falten
-    faktor = 1 - 0.55 * quetsch
-    w = w0 * faktor
-    tief = 6 * quetsch
-    band = (t * 0.9) % 1
-    for k in range(falten):
-        a0 = -34 + k * w0
-        p.save()
-        p.translate(x_links + k * w, y)
-        tr = QTransform()
-        if k % 2 == 0:
-            tr.shear(0, tief / w)
-        else:
-            tr.translate(0, tief)
-            tr.shear(0, -tief / w)
-        p.setTransform(tr, True)
-        p.scale(faktor, 1)
-        p.translate(-a0, 0)
-        p.setClipRect(QRectF(a0, -82, w0, 84))
-        zeichne_monitor(p, 0, 0, bild=bild, t=t, kaputt=kaputt, flackern=flackern)
-        if bild > 0:
-            p.setPen(KEIN_STIFT)
-            yb = -72 + band * 44
-            p.setBrush(QColor(235, 255, 245, 170))
-            p.drawRect(QRectF(a0, yb, w0, 6))
-            p.setBrush(QColor(235, 255, 245, 60))
-            p.drawRect(QRectF(a0, yb - 7, w0, 7))
-        if quetsch > 0:
-            p.setPen(KEIN_STIFT)
-            if k % 2:
-                p.setBrush(linear(a0, 0, a0 + w0, 0, QColor(0, 0, 0, int(110 * quetsch)), QColor(0, 0, 0, int(30 * quetsch))))
-            else:
-                p.setBrush(linear(a0, 0, a0 + w0, 0, QColor(255, 255, 255, int(10 * quetsch)), QColor(255, 255, 255, int(70 * quetsch))))
-            p.drawRect(QRectF(a0, -82, w0, 84))
-            p.setBrush(QColor(60, 50, 40, int(120 * quetsch)))
-            p.drawRect(QRectF(a0 + (w0 - 1.5 if k % 2 == 0 else 0), -80, 1.5, 80))
-        p.restore()
-
-
-def harmonika_breite(quetsch):
-    return 68.0 * (1 - 0.55 * quetsch)

@@ -1,24 +1,21 @@
 """Requisiten für die Professor-Szenen der Gruppe Labor A: Schaumberg, Seifenblase,
-Explosion, Leuchtbommel, Mini-Rakete mit Fallschirm, Schneemaschine, Schneehülle,
-lose Brille und Zauberstab. Alle in Zeichen-Einheiten, Fuß/Boden im Ursprung."""
+Explosion, Rakete mit Fallschirm und Fernauslöser, Paddelarm. Alle in Zeichen-Einheiten, Fuß/Boden im Ursprung."""
 import math
 
 from PyQt6.QtCore import QPointF, QRectF
 from PyQt6.QtGui import QColor, QPainterPath, QTransform
 
-from .grundlagen import (GOLD, GOLD_HELL, KEIN_PINSEL, KEIN_STIFT, ROT, ROT_DUNKEL, ROT_HELL, WEISS, kreis,
+from .grundlagen import (KEIN_PINSEL, KEIN_STIFT, ROT_DUNKEL, ROT_HELL, kreis,
                          linear, radial, stern, stift)
 from .labor import METALL, METALL_DUNKEL
-from .professor import BRILLE, KOPF_Y
+from .professor import KOPF_Y, _arm
 
 SCHAUM_HELL = QColor('#FBF1FF')
 SCHAUM = QColor('#E6CBF5')
 SCHAUM_DUNKEL = QColor('#B892D6')
-SCHNEE = QColor('#FBFDFF')
-SCHNEE_SCHATTEN = QColor('#C4D8EE')
 
 
-# ---------------------------------------------------------------- Mütze und Bommel am Kopf
+# ---------------------------------------------------------------- Mütze am Kopf
 
 def muetze_trafo(pose, haare=0.0, vorn=None):
     """Figur-Einheiten der Mütze, wie zeichne_muetze_prof(p, 0, 0) sie erwartet, wenn sie auf dem Kopf sitzt."""
@@ -34,39 +31,6 @@ def muetze_trafo(pose, haare=0.0, vorn=None):
     else:
         tr.translate(-3, -16 - 22 * haare)
     return tr
-
-
-def bommel_lokal(pose, haare=0.0):
-    """Lage der Mützenbommel in Figur-Einheiten."""
-    q = muetze_trafo(pose, haare).map(QPointF(-28 + pose.wipp, -24))
-    return q.x(), q.y()
-
-
-def zeichne_leuchtbommel(p, x, y, staerke, t=0.0):
-    """Glühende Bommel mit Lichthof; staerke 0..1."""
-    if staerke <= 0:
-        return
-    puls = 1 + 0.08 * math.sin(t * 9)
-    p.setPen(KEIN_STIFT)
-    p.setBrush(radial(x, y, 62 * puls, QColor(255, 236, 150, int(min(255, 175 * staerke))), QColor(255, 220, 120, 0)))
-    kreis(p, x, y, 62 * puls)
-    p.setBrush(radial(x, y, 22, QColor(255, 250, 220, int(min(255, 240 * staerke))), QColor(255, 225, 120, 0)))
-    kreis(p, x, y, 18)
-    staerke = min(1.0, staerke)
-    innen = QColor(255, 255, 240, int(255 * staerke))
-    aussen = QColor(255, 214, 90, int(255 * staerke))
-    p.setBrush(radial(x - 2, y - 2, 9, innen, aussen))
-    for dx, dy in ((0, 0), (-3, -3), (3, -3), (-3, 3), (3, 3)):
-        kreis(p, x + dx, y + dy, 5.4)
-    p.setBrush(QColor(255, 255, 255, int(230 * staerke)))
-    kreis(p, x - 2.5, y - 3, 2.2)
-    p.setPen(stift(QColor(255, 240, 170, int(200 * staerke)), 1.6))
-    for k in range(8):
-        w = k * math.pi / 4 + t * 0.8
-        r0, r1 = 13, 19 + 3 * math.sin(t * 7 + k)
-        p.drawLine(QPointF(x + math.cos(w) * r0, y + math.sin(w) * r0),
-                   QPointF(x + math.cos(w) * r1, y + math.sin(w) * r1))
-    p.setPen(KEIN_STIFT)
 
 
 # ---------------------------------------------------------------- Schaum
@@ -302,239 +266,24 @@ def zeichne_streichholz(p, x, y, winkel=0.0, brennt=True, t=0.0):
     p.restore()
 
 
-# ---------------------------------------------------------------- Schneemaschine
-
-def zeichne_schneemaschine(p, kurbel=0.0, laeuft=0.0, t=0.0, rueck=False):
-    """Schneekanone auf Rädern, Boden mittig im Ursprung. Kurbel an einem Ausleger links
-    (KURBEL_ACHSE), die Düse biegt sich nach links oben (DUESE)."""
+def zeichne_ausloeser(p, x, y, druck=0.0):
+    """Fernauslöser mit dickem roten Knopf, Griff mittig bei (x, y); druck 0..1."""
     p.setPen(KEIN_STIFT)
-    p.setBrush(QColor(0, 0, 0, 40))
-    p.drawEllipse(QRectF(-40, -3, 80, 6))
-    for rx in (-20, 20):
-        p.setBrush(radial(rx - 2, -11, 12, QColor('#5A5F6A'), QColor('#22252B')))
-        kreis(p, rx, -10, 10)
-        p.setBrush(METALL)
-        kreis(p, rx, -10, 3)
-    # Ausleger für die Kurbel
-    ax, ay = KURBEL_ACHSE
-    p.setPen(stift(METALL_DUNKEL, 5))
-    p.drawLine(QPointF(-26, -60), QPointF(ax, ay + 4))
-    p.setPen(stift(METALL, 2))
-    p.drawLine(QPointF(-26, -61), QPointF(ax, ay + 3))
-    p.setPen(KEIN_STIFT)
-    # Gehäuse
-    p.setBrush(linear(-32, -100, 32, -16, QColor('#8BCDF0'), QColor('#2E77A8')))
-    p.drawRoundedRect(QRectF(-30, -100, 60, 84), 8, 8)
-    p.setBrush(QColor(255, 255, 255, 90))
-    p.drawRoundedRect(QRectF(-26, -96, 9, 74), 4, 4)
-    p.setPen(stift(WEISS, 2.2))
-    for k in range(3):
-        w = math.radians(k * 60 + t * 90 * laeuft * (-1 if rueck else 1))
-        p.drawLine(QPointF(6 - math.cos(w) * 12, -56 - math.sin(w) * 12),
-                   QPointF(6 + math.cos(w) * 12, -56 + math.sin(w) * 12))
-    p.setPen(KEIN_STIFT)
-    an = QColor('#FF5A4A') if rueck else QColor('#7CFF8A')
-    p.setBrush(an if laeuft > 0 and (t * 4) % 1 < 0.6 else QColor('#3E5560'))
-    kreis(p, 20, -88, 3.5)
-    p.setBrush(QColor(255, 255, 255, 230))
-    for k in range(3):
-        kreis(p, -12 + k * 10, -100 + abs(k - 1) * 1.5, 5)
-    # Düse nach links oben
-    wackel = math.sin(t * 30) * 1.2 * laeuft
-    duese = QPainterPath()
-    duese.moveTo(-16, -98)
-    duese.cubicTo(-16, -128, -22, -146, -38, -158 + wackel)
-    duese.lineTo(-44, -146 + wackel)
-    duese.cubicTo(-30, -138, 2, -126, 6, -98)
-    duese.closeSubpath()
-    p.setBrush(linear(-44, -150, 6, -100, QColor('#E9EEF3'), METALL_DUNKEL))
-    p.drawPath(duese)
-    p.save()
-    p.translate(DUESE[0], DUESE[1] + wackel)
-    p.rotate(-30)
+    p.setBrush(linear(x - 13, 0, x + 13, 0, QColor('#6A7280'), QColor('#2E333C')))
+    p.drawRoundedRect(QRectF(x - 13, y - 7, 26, 17), 3, 3)
+    p.setBrush(QColor('#E3A928'))
+    p.drawRect(QRectF(x - 13, y + 4, 26, 3))
     p.setBrush(METALL_DUNKEL)
-    p.drawEllipse(QPointF(0, 0), 5, 9)
-    p.setBrush(QColor('#2C3138'))
-    p.drawEllipse(QPointF(-1, 0), 3, 6.5)
-    p.restore()
-    # Kurbel
-    p.setBrush(METALL_DUNKEL)
-    kreis(p, ax, ay, 6)
-    w = math.radians(kurbel)
-    kx, ky = ax + math.cos(w) * KURBEL_R, ay + math.sin(w) * KURBEL_R
-    p.setPen(stift(METALL_DUNKEL, 4))
-    p.drawLine(QPointF(ax, ay), QPointF(kx, ky))
+    p.drawRect(QRectF(x - 7, y - 9, 14, 3))
+    kh = 6 * (1 - 0.75 * druck)
+    p.setBrush(radial(x - 2, y - 9 - kh, 9, ROT_HELL, ROT_DUNKEL))
+    p.drawRect(QRectF(x - 6, y - 8 - kh, 12, kh))
+    p.drawEllipse(QRectF(x - 6, y - 11 - kh, 12, 6))
+    p.setBrush(QColor(255, 255, 255, 150))
+    kreis(p, x - 2.5, y - 9 - kh, 1.6)
+
+
+def zeichne_paddelarm(p, x, y, winkel):
+    """Kittelärmel mit gelbem Handschuh, Schulter bei (x, y), winkel wie Pose.arm_v."""
     p.setPen(KEIN_STIFT)
-    p.setBrush(linear(kx - 4, ky, kx + 4, ky, ROT_HELL, ROT_DUNKEL))
-    p.drawRoundedRect(QRectF(kx - 3.5, ky - 7, 7, 14), 3, 3)
-    p.setBrush(METALL)
-    kreis(p, ax, ay, 2.5)
-
-
-KURBEL_ACHSE = (-44, -98)
-KURBEL_R = 14
-DUESE = (-41, -152)
-
-
-def kurbel_griff(kurbel):
-    w = math.radians(kurbel)
-    return KURBEL_ACHSE[0] + math.cos(w) * KURBEL_R, KURBEL_ACHSE[1] + math.sin(w) * KURBEL_R
-
-
-def _schnee_kugel(p, x, y, r):
-    p.setBrush(radial(x - r * 0.35, y - r * 0.4, r * 1.35, SCHNEE, SCHNEE_SCHATTEN))
-    kreis(p, x, y, r)
-
-
-KUGELN = ((2, -46, 58), (0, -124, 48), (2, -192, 44), (-26, -200, 32), (-14, -226, 28))
-
-
-def schneehuelle_pfad(arm=True):
-    """Schneemann um den Professor in Figur-Einheiten (Blick nach rechts)."""
-    pfad = QPainterPath()
-    for x, y, r in KUGELN:
-        pfad.addEllipse(QPointF(x, y), r, r)
-    if arm:
-        pfad.addEllipse(QPointF(34, -118), 26, 22)
-    return pfad.simplified()
-
-
-def zeichne_schneehuelle(p, hoehe, oben_ab=0.0, arm=True, gesicht=0.0, t=0.0):
-    """Schnee wächst vom Boden bis 'hoehe' (Einheiten über dem Fuß); oben_ab schmilzt von oben bis zu dieser
-    Höhe zurück (0: nichts). gesicht 0..1: Brille und Nase auf der Schneekugel."""
-    if hoehe <= 0:
-        return
-    pfad = schneehuelle_pfad(arm)
-    p.save()
-    p.setPen(KEIN_STIFT)
-    oben = -hoehe
-    if oben_ab:
-        oben = max(oben, -oben_ab)
-    p.setClipRect(QRectF(-120, oben, 240, -oben + 4))
-    p.setBrush(linear(0, -230, 0, 0, SCHNEE, SCHNEE_SCHATTEN))
-    p.drawPath(pfad)
-    for x, y, r in KUGELN:
-        p.setBrush(radial(x - r * 0.4, y - r * 0.45, r * 0.9, QColor(255, 255, 255, 200), QColor(255, 255, 255, 0)))
-        kreis(p, x - r * 0.3, y - r * 0.35, r * 0.7)
-    # Schneerand oben: Klumpen
-    if oben > -232:
-        for k in range(7):
-            kx = -50 + k * 16 + math.sin(k * 2.1) * 4
-            if pfad.contains(QPointF(kx, oben + 3)):
-                _schnee_kugel(p, kx, oben + 2, 9)
-    p.setBrush(QColor(255, 255, 255, 230))
-    for k in range(6):
-        stern(p, -30 + k * 13, -30 - ((k * 37) % 180), 2.2 + math.sin(t * 6 + k))
-    if gesicht > 0 and oben < -200:
-        p.setPen(stift(QColor(BRILLE.red(), BRILLE.green(), BRILLE.blue(), int(255 * gesicht)), 2.4))
-        p.setBrush(QColor(200, 230, 255, int(60 * gesicht)))
-        kreis(p, 22, -194, 10)
-        p.drawLine(QPointF(12, -195), QPointF(-8, -192))
-        p.setPen(KEIN_STIFT)
-        p.setBrush(QColor(242, 164, 143, int(255 * gesicht)))
-        p.drawEllipse(QPointF(34, -186), 7, 6)
-        p.setBrush(QColor(40, 36, 34, int(255 * gesicht)))
-        for k in range(4):
-            kreis(p, 12 + k * 6, -168 + abs(k - 1.5) * 1.5, 1.8)
-    p.restore()
-
-
-def zeichne_schneeball_po(p, groesse=1.0, t=0.0, dreh=0.0):
-    """Schneekugel um den Hintern (Figur-Einheiten)."""
-    r = 36 * groesse
-    x, y = -30, -72
-    p.setPen(KEIN_STIFT)
-    _schnee_kugel(p, x, y, r)
-    p.save()
-    p.translate(x, y)
-    p.rotate(dreh)
-    p.setBrush(QColor(255, 255, 255, 200))
-    for k in range(5):
-        w = k * 1.25
-        stern(p, math.cos(w) * r * 0.55, math.sin(w) * r * 0.55, 2.2 + math.sin(t * 6 + k))
-    p.setBrush(QColor(170, 195, 225, 110))
-    for k in range(4):
-        w = k * 1.6 + 0.4
-        kreis(p, math.cos(w) * r * 0.7, math.sin(w) * r * 0.7, 3)
-    p.restore()
-
-
-# ---------------------------------------------------------------- Brille und Zauberstab
-
-def zeichne_brille(p, x, y, winkel=0.0, r=9.5):
-    """Runde Brille des Professors allein, Steg bei (x, y)."""
-    p.save()
-    p.translate(x, y)
-    p.rotate(winkel)
-    p.setPen(KEIN_STIFT)
-    for seite in (-1, 1):
-        p.setBrush(QColor(200, 230, 255, 70))
-        kreis(p, seite * (r + 1), 0, r)
-    p.setPen(stift(BRILLE, 2.2))
-    p.setBrush(KEIN_PINSEL)
-    for seite in (-1, 1):
-        kreis(p, seite * (r + 1), 0, r)
-    p.drawLine(QPointF(-1.5, -1), QPointF(1.5, -1))
-    p.drawLine(QPointF(-2 * r - 1, -1), QPointF(-2 * r - 6, -4))
-    p.drawLine(QPointF(2 * r + 1, -1), QPointF(2 * r + 6, -4))
-    p.setPen(stift(QColor(255, 255, 255, 190), 1.4))
-    for seite in (-1, 1):
-        cx = seite * (r + 1)
-        p.drawArc(QRectF(cx - r * 0.7, -r * 0.7, r * 1.4, r * 1.4), 100 * 16, 60 * 16)
-    p.setPen(KEIN_STIFT)
-    p.restore()
-
-
-def zeichne_zauberstab(p, x, y, winkel=0.0, funkeln=0.0, t=0.0):
-    """Elektrode mit Messingkugel, Griff bei (x, y), zeigt bei winkel 0 nach oben."""
-    p.save()
-    p.translate(x, y)
-    p.rotate(winkel)
-    p.setPen(KEIN_STIFT)
-    p.setBrush(linear(-3, 0, 3, 0, QColor('#3B3B44'), QColor('#15151A')))
-    p.drawRoundedRect(QRectF(-3, -8, 6, 16), 2, 2)
-    p.setBrush(linear(-2, 0, 2, 0, METALL, METALL_DUNKEL))
-    p.drawRect(QRectF(-1.6, -30, 3.2, 23))
-    p.setBrush(radial(-1.5, -34, 6, GOLD_HELL, GOLD))
-    kreis(p, 0, -33, 4.5)
-    if funkeln > 0:
-        p.setBrush(radial(0, -33, 16, QColor(190, 230, 255, int(200 * funkeln)), QColor(190, 230, 255, 0)))
-        kreis(p, 0, -33, 16)
-        p.setBrush(QColor(255, 255, 255, int(230 * funkeln)))
-        stern(p, 0, -33, 6 + 2 * math.sin(t * 30))
-    p.restore()
-
-
-def zeichne_sternchen_kreis(p, x, y, r, t):
-    """Kreisende Sternchen über einem benommenen Kopf."""
-    p.setPen(KEIN_STIFT)
-    for k in range(4):
-        w = t * 5 + k * math.pi / 2
-        p.setBrush(GOLD_HELL if k % 2 else WEISS)
-        stern(p, x + math.cos(w) * r, y + math.sin(w) * r * 0.35, 4.5)
-
-
-def zeichne_kippschalter(p, x, y, an):
-    """Kleiner Schaltkasten mit Hebel, Fuß mittig bei (x, y)."""
-    p.setPen(KEIN_STIFT)
-    p.setBrush(linear(x - 9, 0, x + 9, 0, QColor('#3E434C'), QColor('#1E2126')))
-    p.drawRoundedRect(QRectF(x - 9, y - 14, 18, 14), 2, 2)
-    p.setBrush(QColor('#7CFF8A') if an else QColor('#5A2A2A'))
-    kreis(p, x + 5, y - 10, 2)
-    w = math.radians(-30 if an else 30)
-    p.setPen(stift(METALL, 2.4))
-    p.drawLine(QPointF(x - 2, y - 7), QPointF(x - 2 + math.sin(w) * 10, y - 7 - math.cos(w) * 10))
-    p.setPen(KEIN_STIFT)
-    p.setBrush(ROT)
-    kreis(p, x - 2 + math.sin(w) * 10, y - 7 - math.cos(w) * 10, 2.6)
-
-
-def zeichne_kabel_bogen(p, x0, y0, x1, y1, durch=12):
-    p.setPen(stift(QColor('#2E2E2E'), 2.2))
-    p.setBrush(KEIN_PINSEL)
-    k = QPainterPath()
-    k.moveTo(x0, y0)
-    k.quadTo((x0 + x1) / 2, max(y0, y1) + durch, x1, y1)
-    p.drawPath(k)
-    p.setPen(KEIN_STIFT)
-
+    _arm(p, x, y, winkel, False)

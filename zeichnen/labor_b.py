@@ -591,3 +591,44 @@ def glitzer(p, x, y, r, t):
     pfad.quadTo(x, y, x, y - r)
     p.drawPath(pfad)
 
+
+
+# ---------------------------------------------------------------- Riesenklotz (Feder)
+
+def zeichne_riesenklotz(p, x, y, b=64, h=56, dreh=0.0):
+    """Riesiger Eisenklotz mit Bügelgriff und Nieten, steht mittig auf (x, y)."""
+    p.save()
+    p.translate(x, y)
+    p.rotate(dreh)
+    p.setPen(KEIN_STIFT)
+    p.setPen(stift(QColor('#2A2E35'), 7))
+    p.setBrush(KEIN_PINSEL)
+    p.drawArc(QRectF(-b * 0.2, -h - b * 0.24, b * 0.4, b * 0.48), 0, 180 * 16)
+    p.setPen(stift(QColor('#7A828E'), 2))
+    p.drawArc(QRectF(-b * 0.2 + 1, -h - b * 0.24 + 1, b * 0.4 - 2, b * 0.48 - 2), 40 * 16, 100 * 16)
+    p.setPen(KEIN_STIFT)
+    k = QPainterPath()
+    k.moveTo(-b / 2, 0)
+    k.lineTo(-b * 0.38, -h)
+    k.lineTo(b * 0.38, -h)
+    k.lineTo(b / 2, 0)
+    k.closeSubpath()
+    p.setBrush(linear(-b / 2, -h, b / 2, 0, QColor('#7C8490'), QColor('#262A31')))
+    p.drawPath(k)
+    p.setBrush(QColor(255, 255, 255, 50))
+    p.drawRect(QRectF(-b * 0.38, -h, b * 0.76, 4))
+    p.setBrush(QColor(0, 0, 0, 60))
+    p.drawRect(QRectF(-b / 2, -7, b, 7))
+    # eingeprägter Ring statt Beschriftung
+    p.setPen(stift(QColor(0, 0, 0, 70), 3))
+    p.setBrush(KEIN_PINSEL)
+    p.drawEllipse(QRectF(-b * 0.18, -h * 0.66, b * 0.36, h * 0.36))
+    p.setPen(stift(QColor(255, 255, 255, 55), 1.5))
+    p.drawArc(QRectF(-b * 0.18, -h * 0.66 + 1.5, b * 0.36, h * 0.36), 200 * 16, 140 * 16)
+    p.setPen(stift(QColor(255, 255, 255, 80), 2))
+    p.drawLine(QPointF(-b * 0.33, -h + 6), QPointF(-b * 0.44, -10))
+    p.setPen(KEIN_STIFT)
+    for nx, ny in ((-0.34, -0.82), (0.34, -0.82), (-0.42, -0.2), (0.42, -0.2)):
+        p.setBrush(radial(nx * b - 1, ny * h - 1, 4, QColor('#9AA2AE'), QColor('#30343B')))
+        kreis(p, nx * b, ny * h, 3)
+    p.restore()
