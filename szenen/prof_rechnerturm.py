@@ -54,7 +54,7 @@ class Tritt(Schritt):
 class Turm(ProfSzene):
     """Ein Tritt zerlegt den Rechnerturm; nach einer Pause rollt eine Schraube nach,
     er stellt triumphierend den Fuß darauf und rutscht aus."""
-    name, titel, reihenfolge = 'turm', 'Schraube locker', 85
+    name, titel, reihenfolge = 'rechnerturm', 'Schraube locker', 85
 
     def vorbereiten(self):
         self.rand = -self.richtung
