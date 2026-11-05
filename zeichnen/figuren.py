@@ -12,6 +12,7 @@ from PyQt6.QtCore import QPointF, QRectF
 from PyQt6.QtGui import QColor, QPainterPath, QTransform
 
 from .grundlagen import *  # noqa: F401,F403  Farben und Hilfen
+from .figur import zeichne_weihnachtsmann
 from .requisiten import zeichne_rentier
 
 KEKS = QColor('#C98A4B')
@@ -1188,3 +1189,13 @@ class Frostfee:
         flausch(p, [(-26 + k * 8.7, hy - 26 + abs(k - 3) * 6) for k in range(7)], 4.5, False)
         p.setBrush(QColor(255, 255, 255, 230))
         stern(p, 0, hy - 30, 6)
+
+
+class Weihnachtsmann:
+    """Der Weihnachtsmann als Darsteller, etwa als Gast in den Professor-Szenen (pose.sack=False: ohne Sack)."""
+    KASTEN = QRectF(-110, -262, 200, 268)
+    KOPF = (6, -262)
+
+    @staticmethod
+    def zeichne(p, d):
+        zeichne_weihnachtsmann(p, d.pose)

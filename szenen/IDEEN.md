@@ -61,8 +61,41 @@ Wunsch nach Figuren aus einem bekannten Eiskönigin-Film und nach einem bekannte
 | schlittschuh | unten | elegante und wackelige Wichtelschwester, Zusammenstoß |
 | eispalast | unten | Eisblock-Schloss, ein Block zu viel (Mützen-Gag) |
 
+## Vierte Runde: der verrückte Professor
 
-## Vierte Runde: Spiel mit dem echten Bildschirm
+Wunsch von Thomas: „ein verrückter Professor mit Weihnachtsmütze, der irgendwelche Experimente macht und dabei lustige Sachen passieren, an einer kleinen Tafel schreibt und Fehler macht, seinen Computer schlägt und ruiniert, 32 Animationen“. Die Figur ist frei gestaltet (wirres weißes Haar, runde Brille, Laborkittel, gelbe Gummihandschuhe, rote Fliege, etwas zu kleine Weihnachtsmütze) und erinnert bewusst an keinen Filmerfinder und kein berühmtes Porträt. Zeichnung in `zeichnen/professor.py`, Requisiten in `zeichnen/labor.py`, gemeinsame Bausteine (Tafel, Schreck-Varianten, Triumph-Pose) in `szenen/professor.py`.
+
+Auf der Tafel gilt eine Ausnahme vom Textverbot: Ziffern, Rechenzeichen und kurze Gleichungen sind erlaubt, Wörter nicht.
+
+Die Ideen entstanden in drei Runden mit ChatGPT: 24 eigene Vorschläge, von ChatGPT bewertet und um 14 eigene ergänzt; danach haben wir Pointen geschärft und Schreck-Abgänge gesucht. Dagegengehalten habe ich bei: Explosion bleibt (Thomas wünscht sie), kein Hineinschauen in die Rakete, keine Flüssigkeit auf Elektrogeräte, nichts zu Feinteiliges für 15 % Bildschirmhöhe. **GPT** kennzeichnet Ideen von ChatGPT, *W* eine Schlusswendung von ChatGPT. Ebenfalls von ChatGPT: die Triumph-Pose als Running Gag (beide Hände offen, Füße breit, genau dann geht es schief).
+
+Überarbeitung nach Thomas' Urteil „der Professor ist nicht lustig“: Die ersten 32 Szenen dauerten 15–25 s, bestanden vor allem aus Gehen und Stehen, und ihre Pointen waren bei 15 % Bildschirmhöhe zu klein (eine Rechnung wie 1+1=3 liest bei einer Vorlesung niemand). ChatGPT hat die Bildfolgen aller 32 Szenen schonungslos bewertet (13 behalten oder umbauen, 19 streichen) und Neufassungen nach dem Muster Aufbau – Steigerung – Knall – Reaktion vorgeschlagen, dazu die Ideen Kittel-Ballon und Gummihandschuh. Regeln seitdem: 8–12 s, Problem nach spätestens 2 s, bis zu drei Versuche mit wachsendem Körpereinsatz, Erwartungspause vor dem Knall, der Knall verändert die ganze Körperpose, Requisiten mindestens 0,3 Figurenhöhen groß, und der Abgang folgt aus dem Unglück (kein Tisch-Hinausschieben mehr).
+
+Gemeinsame Gags in `szenen/professor.py`: `Knall` (Blitz, Rauchwolke von zwei bis drei Figurenhöhen, aschgraues Gesicht, Haare zu Berge, Brille schief, Mütze angesengt, alles qualmt weiter), `Publikumsblick` (trockener Blick ins Publikum, zweimal Blinzeln, Hustwölkchen), `wuerde_pose` (Kittel glattziehen), `Umkippen` (steif wie ein Brett). Running Gags: Triumph-Pose kurz vor dem Unglück, Publikumsblick danach, die Mütze kommt zu spät.
+
+Gestrichen: brillendieb, eingeschneit, einsplus, endlos, geisterkreide, harmonika, immermehr, jonglage, klapptafel, klopfen, korrektur, kringel, laptop, leuchtbommel, null, quietschen, rechnerturm, schwerkraft, tasten.
+
+| Name | Titel | Ablauf und Pointe |
+|---|---|---|
+| bumm | Bumm! | Pff aus dem Kolben, er dreht die Flamme hoch, es brodelt, Triumph-Pose, Knall mit Riesenwolke; Rußgesicht, qualmende Haare, Publikumsblick mit Husten, die Mütze landet verspätet, er kippt steif um und geht in Rauch auf. |
+| rakete | Mützenrakete | Fernauslöser, Klaps, Tritt: nichts. Er legt das Ohr an, sie startet, spießt seine Mütze auf und pustet ihn rußig nach hinten; die Mütze kommt am Fallschirm zurück und rutscht ihm über die Augen, er tastet sich hinaus. |
+| schaum | Schaumberg | **GPT:** Eine Riesenblase, er drückt sie platt, Schaum bis zum Kinn, Publikumsblick, eine Welle verschluckt ihn; zwei Arme paddeln den Schaumberg hinaus, die Mütze hüpft verspätet hinterher. |
+| magnet | Magnetkraft | Hebelstufe für Stufe hebt der Magnet den ganzen Wichtel, bis er waagerecht klebt; dann zieht er den Professor an der Brille hinterher, beide kleben, der Ständer rollt mit ihnen davon. |
+| feder | Schwergewicht Feder | **GPT:** Die Feder wiegt mehr als der Riesenklotz; Drücken, Stemmen, waagerecht hängen. Der Pinguin pustet die Feder weg, Bauchklatscher, Beine schlagen hoch; Würde-Pose, er humpelt hinaus. |
+| glocke | Unter der Glocke | **GPT:** Die Schneeflocke entwischt dreimal, dann fällt eine Riesenglocke über ihn: Gesicht platt am Glas, Atem beschlägt; er rutscht bäuchlings darunter hervor. |
+| mikroskop | Gegenbesichtigung | **GPT:** Das Rohr wächst seinem Auge nach, er lehnt sich weit zurück, ein Riesenauge öffnet sich vor seiner Nase, er plumpst hin; das Auge zwinkert, das Mikroskop hüpft ihm nach. |
+| kreide | Unzerbrechliche Kreide | Kreide bricht zweimal, er zieht eine Riesenkreide aus dem Kittel, ein Strich spaltet die Tafel; er nickt der Kreide anerkennend zu, sie bricht doch, fällt ihm auf den Fuß, er hüpft hinaus. |
+| schwamm | Radikaler Schwamm | **GPT:** Der Schwamm wischt die Tafel selbst weg, er fällt durch den leeren Rahmen, wischt sich versehentlich die halbe Mütze weg und schließlich sich selbst, bis nur die Beine davonlaufen. |
+| handschuh | Gummihandschuh | **GPT:** Der Handschuh klemmt; Hand, Fuß, ganzer Körper, bis er sich über 1 Figurenhöhe dehnt, dann schnellt er zurück und stülpt sich über seinen Kopf; die Finger klappen herab, er tastet sich hinaus. |
+| kabel | Kabelsalat | Der Knäuel rührt sich nicht, drei immer schnellere Drehungen wickeln ihn ein, der letzte Ruck wirbelt ihn wie einen Kreisel; Sterne, Publikumsblick, er hüpft gefesselt hinaus, der Stecker hüpft hinterher. |
+| ventilator | Kittel im Wind | **GPT:** Der Ventilator bläht den Kittel zum Ballon, er hebt ab und paddelt; beim Ausschalten erwischt er die vierte Stufe und wird quer hinausgeschossen, die Mütze saust verspätet hinterher. |
+| drucker | Papierlawine | Ein Blatt, drei Blätter, ein Strom; er hält den Schlitz zu, ein Papierberg begräbt ihn, die Hand winkt, das letzte Blatt deckt sie zu, der Berg schlurft auf Schuhen hinaus. |
+| kuehlen | Eiskalt gekühlt | Riesige Qualmwolke, Wedeln macht sie größer, der Pinguin setzt sich drauf, Triumph; eine Eiswelle friert seinen Handschuh fest, er rutscht heraus und fliegt auf den Rücken, der Pinguin rodelt mit dem Eisblock davon. |
+| mauszeiger | Mäusejagd | **GPT:** Der Zeiger springt heraus und wächst, die Katze springt hinterher in den Bildschirm und strampelt; er zieht sie heraus, sie trägt den Riesenzeiger im Maul davon. |
+
+Schreck: bei allen Szenen in 0,7–1,4 s vom Bildschirm (`pruefen.py`).
+
+## Fünfte Runde: Spiel mit dem echten Bildschirm
 
 Diese Szenen tun nur so, als veränderten sie andere Programme. `abgreifen.py` holt ein Bildschirmfoto und die Lage der Schreibmarke, `bildanalyse.py` schneidet die Zeile aus und baut einen Flicken zum Abdecken. Die Szene deckt das Original ab und spielt mit der Kopie. Findet sich nichts Passendes, fällt die Szene aus.
 
