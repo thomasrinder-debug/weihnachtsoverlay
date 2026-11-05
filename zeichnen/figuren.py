@@ -465,7 +465,8 @@ class Pinguin:
             p.drawEllipse(QRectF(-8, -4, 16, 46))
             p.restore()
 
-        fluegel(-14, -pose.arm_h * -1 + 12, True)
+        p.rotate(pose.bein_v * 0.3)      # watscheln
+        fluegel(-14, pose.arm_h + 12, True)
         fuss(-10, pose.bein_h, True)
         fuss(6, pose.bein_v, False)
         p.setBrush(radial(-10, -90 + h, 90, QColor('#4A5275'), dunkel))
