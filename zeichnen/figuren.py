@@ -800,8 +800,8 @@ class Eisbaer:
             kreis(p, bx - blase * 0.35, by - blase * 0.4, blase * 0.18)
 
 
-def zeichne_baerenkopf_vorn(p, x, y, pose, t):
-    """Eisbärkopf von vorn, Mitte in (x, y)."""
+def zeichne_baerenkopf_vorn(p, x, y, pose, t, zunge=0.0):
+    """Eisbärkopf von vorn, Mitte in (x, y). zunge (0..1) streckt die Zunge heraus."""
     for seite in (-1, 1):
         p.setBrush(EISBAER_SCHATTEN)
         kreis(p, x + seite * 24, y - 24, 10)
@@ -825,6 +825,12 @@ def zeichne_baerenkopf_vorn(p, x, y, pose, t):
         p.setBrush(KEIN_PINSEL)
         p.drawArc(QRectF(x - 6, y + 10, 6, 6), 200 * 16, 140 * 16)
         p.drawArc(QRectF(x, y + 10, 6, 6), 200 * 16, 140 * 16)
+        p.setPen(KEIN_STIFT)
+    if zunge > 0:
+        p.setBrush(radial(x, y + 18, 10 * zunge, QColor('#FF8FA0'), QColor('#D9506A')))
+        p.drawRoundedRect(QRectF(x - 5, y + 14, 10, 4 + 12 * zunge), 5, 5)
+        p.setPen(stift(QColor('#B8405A'), 1))
+        p.drawLine(QPointF(x, y + 16), QPointF(x, y + 14 + 9 * zunge))
         p.setPen(KEIN_STIFT)
 
 
