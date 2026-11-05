@@ -672,3 +672,14 @@ class Rutsche(Renne):
     def ende(self, sz):
         super().ende(sz)
         sz.hopp = 0.0
+
+
+def muetze_richten(wer, dauer=1.6):
+    """Running Gag: der Wichtel richtet seine abgeknickte Mützenspitze würdevoll gerade,
+    sie knickt sofort wieder ab. Schritte für die Schrittliste."""
+    return [Mit(wer, Stehe(0.35, lambda d, u: Pose(arm_v=-175 * min(1.0, u / 0.3), arm_v_x=6, kopf_vorn=True))),
+            Mit(wer, Wandel(0.3, knick=0.0)),
+            Mit(wer, Stehe(0.25, Pose(kopf_vorn=True, auge_zu=True))),
+            Mit(wer, Stehe(dauer - 1.2, Pose(kopf_vorn=True, auge_zu=True, mund_offen=False))),
+            Mit(wer, Wandel(0.06, knick=1.0)),
+            Mit(wer, Stehe(0.24, Pose(kopf_vorn=True, sorge=1.0, blick_y=-0.8)))]

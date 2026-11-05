@@ -518,3 +518,267 @@ def zeichne_strumpf(p, voll=0.0):
     p.restore()
     flausch(p, [(x, 22 + (5 if (x // 8) % 2 else 0)) for x in range(-24, 27, 8)], 8)
     flausch(p, [(x, 30) for x in range(-24, 27, 8)], 8)
+
+
+EIS = QColor(205, 235, 255, 235)
+EIS_DUNKEL = QColor(120, 180, 225, 235)
+
+
+def zeichne_eiszapfen(p, laenge, breite=18, ab=0.0):
+    """Eiszapfen, Wurzel im Ursprung, hängt nach unten. ab: so viel (0..1) ist unten abgebrochen."""
+    bis = laenge * (1 - ab)
+    pfad = QPainterPath()
+    pfad.moveTo(-breite / 2, 0)
+    pfad.lineTo(breite / 2, 0)
+    if ab > 0:
+        rest = breite / 2 * (1 - bis / laenge)
+        pfad.lineTo(rest, bis - 3)
+        pfad.lineTo(rest * 0.2, bis + 2)
+        pfad.lineTo(-rest, bis - 1)
+    else:
+        pfad.quadTo(breite * 0.25, laenge * 0.6, 0, laenge)
+        pfad.quadTo(-breite * 0.3, laenge * 0.6, -breite / 2, 0)
+    pfad.closeSubpath()
+    p.setBrush(linear(-breite / 2, 0, breite / 2, 0, EIS, EIS_DUNKEL))
+    p.drawPath(pfad)
+    p.setPen(stift(QColor(255, 255, 255, 220), 1.6))
+    p.drawLine(QPointF(-breite * 0.22, 4), QPointF(-breite * 0.08, bis * 0.7))
+    p.setPen(KEIN_STIFT)
+
+
+def zeichne_eisstueck(p, laenge, breite=12):
+    """Abgebrochene Zapfenspitze, Mitte im Ursprung, Spitze nach unten."""
+    pfad = QPainterPath()
+    pfad.moveTo(-breite / 2, -laenge / 2)
+    pfad.lineTo(breite * 0.1, -laenge / 2 - 3)
+    pfad.lineTo(breite / 2, -laenge / 2 + 1)
+    pfad.quadTo(breite * 0.2, laenge * 0.2, 0, laenge / 2)
+    pfad.quadTo(-breite * 0.3, laenge * 0.1, -breite / 2, -laenge / 2)
+    p.setBrush(linear(-breite / 2, 0, breite / 2, 0, EIS, EIS_DUNKEL))
+    p.drawPath(pfad)
+    p.setBrush(QColor(255, 255, 255, 230))
+    stern(p, -breite * 0.15, -laenge * 0.15, 3.5)
+
+
+def zeichne_rodel(p):
+    """Holzrodel, Kufen im Ursprung auf dem Boden, Spitze nach rechts."""
+    holz, dunkel = QColor('#C98A4B'), QColor('#7A4A22')
+    p.setBrush(KEIN_PINSEL)
+    p.setPen(stift(dunkel, 4.5))
+    for dy in (0,):
+        kufe = QPainterPath()
+        kufe.moveTo(-52, -3 + dy)
+        kufe.lineTo(40, -3 + dy)
+        kufe.cubicTo(58, -3, 62, -22, 50, -28)
+        p.drawPath(kufe)
+    p.setPen(stift(dunkel, 3.5))
+    for x in (-38, -6, 26):
+        p.drawLine(QPointF(x, -4), QPointF(x, -20))
+    p.setPen(KEIN_STIFT)
+    for i, x in enumerate(range(-50, 40, 15)):
+        p.setBrush(linear(0, -26, 0, -18, holz.lighter(115 + 4 * (i % 2)), holz.darker(110)))
+        p.drawRoundedRect(QRectF(x, -27, 13, 8), 2, 2)
+    p.setPen(stift(QColor('#B8322A'), 2))
+    zug = QPainterPath()
+    zug.moveTo(48, -26)
+    zug.cubicTo(62, -30, 64, -10, 56, -4)
+    p.drawPath(zug)
+    p.setPen(KEIN_STIFT)
+
+
+def zeichne_ski(p, x, y, winkel, laenge=120):
+    """Ein Ski, Bindung in (x, y), Spitze nach rechts."""
+    p.save()
+    p.translate(x, y)
+    p.rotate(winkel)
+    ski = QPainterPath()
+    ski.moveTo(-laenge * 0.4, 0)
+    ski.lineTo(laenge * 0.5, 0)
+    ski.quadTo(laenge * 0.62, -1, laenge * 0.6, -10)
+    ski.lineTo(laenge * 0.55, -4)
+    ski.lineTo(-laenge * 0.4, -4)
+    ski.closeSubpath()
+    p.setBrush(linear(0, -4, 0, 0, QColor('#2A6FD6').lighter(130), QColor('#1C4A99')))
+    p.drawPath(ski)
+    p.setBrush(QColor(255, 255, 255, 200))
+    p.drawRect(QRectF(-laenge * 0.3, -3.2, laenge * 0.7, 1.2))
+    p.setBrush(QColor('#333333'))
+    p.drawRoundedRect(QRectF(-8, -7, 16, 4), 1.5, 1.5)
+    p.restore()
+
+
+def zeichne_schneehaufen(p, x, y, b, h):
+    """Weicher Schneehaufen am Boden, Mitte unten in (x, y), Breite b, Höhe h (Pixel)."""
+    if h <= 0.5:
+        return
+    pfad = QPainterPath()
+    pfad.moveTo(x - b / 2, y + 2)
+    pfad.cubicTo(x - b * 0.35, y - h * 0.9, x - b * 0.15, y - h * 1.05, x, y - h)
+    pfad.cubicTo(x + b * 0.18, y - h * 1.02, x + b * 0.38, y - h * 0.8, x + b / 2, y + 2)
+    pfad.closeSubpath()
+    p.setBrush(linear(x, y - h, x, y, WEISS, QColor('#C7D8EC')))
+    p.drawPath(pfad)
+    p.setBrush(QColor(255, 255, 255, 200))
+    for dx, dy, r in ((-0.2, 0.75, 0.05), (0.1, 0.85, 0.035), (0.25, 0.5, 0.03)):
+        kreis(p, x + dx * b, y - dy * h, max(1.0, r * b))
+
+
+def zeichne_topf(p):
+    """Alter Kochtopf als Hut, Rand mittig im Ursprung (Öffnung nach unten)."""
+    p.setBrush(linear(-26, 0, 26, 0, QColor('#C9CDD4'), QColor('#6C727C')))
+    p.drawRoundedRect(QRectF(-24, -34, 48, 34), 4, 4)
+    p.setBrush(linear(-29, 0, 29, 0, QColor('#DDE1E6'), QColor('#7A808A')))
+    p.drawRoundedRect(QRectF(-29, -5, 58, 7), 3, 3)
+    p.setBrush(QColor('#4A4F57'))
+    p.drawRoundedRect(QRectF(-36, -26, 9, 5), 2, 2)
+    p.drawRoundedRect(QRectF(27, -26, 9, 5), 2, 2)
+    p.setBrush(QColor(255, 255, 255, 120))
+    p.drawRect(QRectF(-16, -31, 5, 24))
+    p.setBrush(QColor(120, 70, 40, 90))
+    kreis(p, 10, -14, 3)
+
+
+def zeichne_zimtstern(p, r, fehlt=-1):
+    """Zimtstern mit Eiweißglasur, Mitte im Ursprung. fehlt: Index der abgebissenen Zacke."""
+    def stern_pfad(ra, ri):
+        pfad = QPainterPath()
+        for i in range(10):
+            w = math.radians(-90 + i * 36)
+            rr = ra if i % 2 == 0 else ri
+            if i % 2 == 0 and i // 2 == fehlt:
+                rr = ri * 1.05
+            pt = QPointF(math.cos(w) * rr, math.sin(w) * rr)
+            pfad.moveTo(pt) if i == 0 else pfad.lineTo(pt)
+        pfad.closeSubpath()
+        return pfad
+    p.setPen(stift(QColor('#6B3E1E'), r * 0.08))
+    p.setBrush(radial(-r * 0.2, -r * 0.2, r * 1.3, QColor('#B9773E'), QColor('#7A4520')))
+    p.drawPath(stern_pfad(r, r * 0.48))
+    p.setPen(KEIN_STIFT)
+    p.setBrush(linear(0, -r, 0, r, QColor('#FFFFFF'), QColor('#E9E2D6')))
+    p.drawPath(stern_pfad(r * 0.82, r * 0.38))
+    if fehlt >= 0:
+        w = math.radians(-90 + fehlt * 72)
+        p.setBrush(QColor('#A8692F'))
+        for k in (-0.12, 0.0, 0.12):
+            kreis(p, math.cos(w + k) * r * 0.52, math.sin(w + k) * r * 0.52, r * 0.07)
+
+
+def zeichne_besen(p, winkel=0.0):
+    """Reisigbesen, Borstenende im Ursprung, Stiel nach oben."""
+    p.save()
+    p.rotate(winkel)
+    p.setBrush(linear(-3, 0, 3, 0, QColor('#B07A42'), QColor('#6B4423')))
+    p.drawRoundedRect(QRectF(-3, -150, 6, 120), 3, 3)
+    p.setPen(stift(QColor('#8A6A2A'), 1.6))
+    for i in range(9):
+        dx = -16 + i * 4
+        p.drawLine(QPointF(dx * 0.4, -36), QPointF(dx, 0))
+    p.setPen(KEIN_STIFT)
+    p.setBrush(QColor('#B23A2A'))
+    p.drawRoundedRect(QRectF(-8, -40, 16, 7), 2, 2)
+    p.restore()
+
+
+def zeichne_kehrblech(p):
+    """Kleines Kehrblech, Kante vorn im Ursprung am Boden, Griff nach hinten (links)."""
+    p.setBrush(linear(0, -14, 0, 0, QColor('#E04A3A'), QColor('#8A1E14')))
+    blech = QPainterPath()
+    blech.moveTo(10, 0)
+    blech.lineTo(-48, 0)
+    blech.lineTo(-48, -16)
+    blech.quadTo(-20, -8, 10, 0)
+    p.drawPath(blech)
+    p.drawRoundedRect(QRectF(-72, -14, 26, 6), 3, 3)
+
+
+def zeichne_keks(p, r):
+    """Runder Butterkeks mit Zackenrand, Mitte im Ursprung."""
+    pfad = QPainterPath()
+    n = 18
+    for i in range(n * 2):
+        w = i * math.pi / n
+        rr = r if i % 2 == 0 else r * 0.9
+        pt = QPointF(math.cos(w) * rr, math.sin(w) * rr)
+        pfad.moveTo(pt) if i == 0 else pfad.lineTo(pt)
+    pfad.closeSubpath()
+    p.setBrush(radial(-r * 0.3, -r * 0.3, r * 1.4, QColor('#F2C878'), QColor('#B97E32')))
+    p.drawPath(pfad)
+    p.setBrush(QColor(120, 70, 20, 150))
+    for dx, dy in ((-0.35, -0.3), (0.3, -0.25), (0.0, 0.1), (-0.3, 0.35), (0.35, 0.3)):
+        kreis(p, dx * r, dy * r, r * 0.07)
+
+
+def zeichne_taennchen(p, abgesaegt=False, nur_spitze=False):
+    """Kleine Tanne, Stamm im Ursprung am Boden. abgesaegt: nur der Stumpf bleibt.
+    nur_spitze: nur der Baum ohne Stamm, Schnittkante im Ursprung (als Mütze)."""
+    if not nur_spitze:
+        p.setBrush(linear(-4, 0, 4, 0, QColor('#8A5A30'), QColor('#5A3A1E')))
+        p.drawRect(QRectF(-4, -12 if abgesaegt else -16, 8, 12 if abgesaegt else 16))
+        if abgesaegt:
+            p.setBrush(QColor('#E8C890'))
+            p.drawEllipse(QRectF(-4, -14, 8, 4))
+            return
+        p.translate(0, -16)
+    for i, (unten, b) in enumerate(((0, 46), (-16, 36), (-30, 24))):
+        pfad = QPainterPath()
+        pfad.moveTo(0, unten - 24)
+        pfad.lineTo(b / 2, unten)
+        pfad.lineTo(-b / 2, unten)
+        pfad.closeSubpath()
+        p.setBrush(linear(-b / 2, unten - 24, b / 2, unten, GRUEN.lighter(130), GRUEN_DUNKEL))
+        p.drawPath(pfad)
+    p.setBrush(QColor(255, 255, 255, 210))
+    for dx, dy in ((-8, -6), (6, -20), (-4, -36)):
+        p.drawEllipse(QPointF(dx, dy), 4, 2)
+
+
+def zeichne_schaufel(p, winkel=0.0, last=False):
+    """Schneeschaufel, Griff im Ursprung, Blatt am Stielende in Richtung winkel (0 = nach rechts)."""
+    p.save()
+    p.rotate(winkel)
+    p.setBrush(linear(0, -3, 0, 3, QColor('#B07A42'), QColor('#6B4423')))
+    p.drawRoundedRect(QRectF(-6, -3, 96, 6), 3, 3)
+    p.setBrush(QColor('#333333'))
+    p.drawRoundedRect(QRectF(-12, -7, 10, 14), 4, 4)
+    blatt = QPainterPath()
+    blatt.moveTo(88, -16)
+    blatt.lineTo(122, -18)
+    blatt.lineTo(124, 18)
+    blatt.lineTo(88, 16)
+    blatt.closeSubpath()
+    p.setBrush(linear(88, -18, 124, 18, QColor('#3FA0D8'), QColor('#1E5F8F')))
+    p.drawPath(blatt)
+    if last:
+        zeichne_schneewuerfel(p, 106, 0, 26, 0)
+    p.restore()
+
+
+def zeichne_schneewuerfel(p, x, y, a, dreh=0.0):
+    """Sauber geschippter Schneewürfel mit Kantenlänge a, Mitte in (x, y)."""
+    p.save()
+    p.translate(x, y)
+    p.rotate(dreh)
+    h = a / 2
+    t = a * 0.28
+    oben = QPainterPath()
+    oben.moveTo(-h, -h)
+    oben.lineTo(-h + t, -h - t)
+    oben.lineTo(h + t, -h - t)
+    oben.lineTo(h, -h)
+    oben.closeSubpath()
+    seite = QPainterPath()
+    seite.moveTo(h, -h)
+    seite.lineTo(h + t, -h - t)
+    seite.lineTo(h + t, h - t)
+    seite.lineTo(h, h)
+    seite.closeSubpath()
+    p.setBrush(WEISS)
+    p.drawPath(oben)
+    p.setBrush(QColor('#B9CCE4'))
+    p.drawPath(seite)
+    p.setBrush(linear(0, -h, 0, h, QColor('#F2F7FF'), QColor('#D2E0F0')))
+    p.drawRect(QRectF(-h, -h, a, a))
+    p.setBrush(QColor(255, 255, 255, 230))
+    stern(p, -h * 0.4, -h * 0.4, a * 0.08)
+    p.restore()

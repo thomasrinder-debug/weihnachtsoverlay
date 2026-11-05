@@ -388,11 +388,12 @@ class Wichtel:
         kragen.closeSubpath()
         p.setBrush(ROT)
         p.drawPath(kragen)
-        Wichtel.kopf(p, pose, t, 4, -124 + h)
+        Wichtel.kopf(p, pose, t, 4, -124 + h, getattr(d, 'knick', None), getattr(d, 'muetze', True))
         _wichtelarm(p, 8, -96 + h, pose.arm_v, False)
 
     @staticmethod
-    def kopf(p, pose, t, x, y):
+    def kopf(p, pose, t, x, y, knick=None, muetze=True):
+        """knick: steife Mütze, deren Spitze um knick·90° nach hinten abknickt (None: weiche Zipfelmütze)."""
         vorn = pose.kopf_vorn
         bx = 0 if vorn else 6
         # Haare und Ohren
@@ -419,6 +420,14 @@ class Wichtel:
         p.setBrush(radial(x + bx + (0 if vorn else 6), y + 2, 6, QColor('#F7A88C'), QColor('#D9735A')))
         kreis(p, x + bx + (0 if vorn else 6), y + 3, 3.6)
         mund(p, x + bx + (0 if vorn else 3), y + 12, 9, pose)
+        if not muetze:
+            p.setBrush(QColor('#C2662D'))
+            for dx in (-10, -3, 4):
+                p.drawEllipse(QPointF(x + dx, y - 19), 5, 4)
+            return
+        if knick is not None:
+            Wichtel.steife_muetze(p, x, y, knick, pose.wipp)
+            return
         # Zipfelmütze mit Glöckchen
         wipp = pose.wipp
         muetze = QPainterPath()
@@ -435,6 +444,36 @@ class Wichtel:
         kreis(p, x - 51 + wipp, y - 16, 5)
         p.setBrush(QColor('#6B4A10'))
         kreis(p, x - 51 + wipp, y - 13, 1.3)
+
+    @staticmethod
+    def steife_muetze(p, x, y, knick, wipp=0.0):
+        """Running Gag: steife Mütze, deren obere Hälfte rechtwinklig nach hinten abknickt."""
+        unten = QPainterPath()
+        unten.moveTo(x - 23, y - 12)
+        unten.lineTo(x + 23, y - 12)
+        unten.lineTo(x + 7, y - 44)
+        unten.lineTo(x - 7, y - 44)
+        unten.closeSubpath()
+        p.setBrush(linear(x - 20, y - 44, x + 20, y - 12, ROT_HELL, ROT_DUNKEL))
+        p.drawPath(unten)
+        p.save()
+        p.translate(x, y - 42)
+        p.rotate(-90 * knick + wipp * 0.3)
+        oben = QPainterPath()
+        oben.moveTo(-7, 2)
+        oben.lineTo(7, 2)
+        oben.lineTo(1.5, -30)
+        oben.lineTo(-1.5, -30)
+        oben.closeSubpath()
+        p.setBrush(linear(-7, -30, 7, 0, ROT_HELL, ROT_DUNKEL))
+        p.drawPath(oben)
+        p.setBrush(ROT_DUNKEL.darker(120))
+        p.drawEllipse(QPointF(0, 1), 7.5, 3)
+        p.setBrush(radial(-1, -33, 6, GOLD_HELL, GOLD.darker(115)))
+        kreis(p, 0, -33, 4.5)
+        p.restore()
+        p.setBrush(linear(0, y - 18, 0, y - 6, WICHTEL_GRUEN.lighter(130), GRUEN_DUNKEL))
+        p.drawRoundedRect(QRectF(x - 25, y - 19, 50, 9), 4.5, 4.5)
 
 
 # ---------------------------------------------------------------- Pinguin
@@ -845,3 +884,87 @@ class Rentier:
     def zeichne(p, d):
         p.translate(0, -60)
         zeichne_rentier(p, d.phase, d.t, False)
+
+
+# ---------------------------------------------------------------- Eichhörnchen
+
+FELL_E = QColor('#C0652A')
+
+
+class Eichhoernchen:
+    """Eichhörnchen mit buschigem Schwanz und Pinselohren; hüpft statt zu gehen."""
+    KASTEN = QRectF(-66, -128, 116, 134)
+    KOPF = (10, -118)
+
+    @staticmethod
+    def zeichne(p, d):
+        pose, t = d.pose, d.t
+        hupf = huepfer(pose)
+        p.translate(0, -14 * hupf)
+        wedel = math.sin(t * 3) * 4 + pose.wipp
+        schwanz = QPainterPath()
+        schwanz.moveTo(-10, -12)
+        schwanz.cubicTo(-48, -10, -58, -60, -36, -90 + wedel)
+        schwanz.cubicTo(-22, -110 + wedel, -2, -100 + wedel, -10, -84 + wedel)
+        schwanz.cubicTo(-30, -84, -30, -50, -6, -30)
+        schwanz.closeSubpath()
+        p.setBrush(radial(-34, -70, 50, FELL_E.lighter(130), FELL_E.darker(130)))
+        p.drawPath(schwanz)
+        p.setPen(stift(FELL_E.lighter(150), 1.4))
+        p.setBrush(KEIN_PINSEL)
+        for k in range(4):
+            p.drawLine(QPointF(-40 + k * 3, -40 - k * 14), QPointF(-34 + k * 3, -44 - k * 14))
+        p.setPen(KEIN_STIFT)
+        # Hinterbein
+        p.save()
+        p.translate(0, -14)
+        p.rotate(pose.bein_v * 0.4)
+        p.setBrush(radial(-4, -4, 18, FELL_E.lighter(110), FELL_E.darker(120)))
+        p.drawEllipse(QPointF(0, 0), 14, 13)
+        p.setBrush(FELL_E.darker(125))
+        p.drawRoundedRect(QRectF(-4, 8, 22, 7), 3.5, 3.5)
+        p.restore()
+        p.setBrush(radial(0, -50, 34, FELL_E.lighter(120), FELL_E.darker(120)))
+        p.drawEllipse(QPointF(2, -40), 17, 26)
+        p.setBrush(QColor('#F3DDBA'))
+        p.drawEllipse(QPointF(10, -36), 9, 18)
+        # Kopf
+        hx, hy = 12, -76
+        p.setBrush(FELL_E.darker(115))
+        ohr = QPainterPath()
+        ohr.moveTo(hx - 8, hy - 10)
+        ohr.lineTo(hx - 6, hy - 30)
+        ohr.lineTo(hx + 2, hy - 12)
+        p.drawPath(ohr)
+        p.setBrush(FELL_E.darker(140))
+        p.drawEllipse(QPointF(hx - 6, hy - 31), 2.5, 4)
+        p.setBrush(radial(hx - 2, hy - 6, 22, FELL_E.lighter(125), FELL_E.darker(115)))
+        p.drawEllipse(QPointF(hx, hy), 16, 15)
+        p.drawEllipse(QPointF(hx + 13, hy + 4), 9, 7)
+        p.setBrush(QColor('#F3DDBA'))
+        p.drawEllipse(QPointF(hx + 10, hy + 8), 8, 5)
+        p.setBrush(SCHWARZ)
+        p.drawEllipse(QPointF(hx + 21, hy + 2), 3, 2.5)
+        bx = 0 if pose.kopf_vorn else 6
+        augen(p, (hx + bx - 4, hx + bx + 6) if pose.kopf_vorn else (hx + bx + 4,), hy - 4, 3.6, 4.2, pose,
+              (blick_x(pose), pose.blick_y), 0.75)
+        brauen(p, (hx + bx + 4,), hy - 11, 6, pose, FELL_E.darker(160))
+        wangen(p, (hx + 8,), hy + 6, 4)
+        if pose.schreck > 0.2 or pose.mund_offen:
+            mund(p, hx + 14, hy + 9, 7, pose, QColor('#5A1A1A'))
+        else:
+            p.setBrush(WEISS)
+            p.drawRect(QRectF(hx + 15, hy + 7, 3, 4))
+        # Vorderpfoten
+        p.save()
+        p.translate(12, -50)
+        p.rotate(pose.arm_v * 0.8 - 30)
+        p.setBrush(FELL_E.darker(110))
+        p.drawRoundedRect(QRectF(-3.5, -2, 7, 20), 3.5, 3.5)
+        p.restore()
+
+
+class WichtelSteif(Wichtel):
+    """Der Wichtel aus dem Running Gag: steife Mütze, deren Spitze abknickt (d.knick)."""
+    KASTEN = QRectF(-75, -212, 150, 218)
+    KOPF = (2, -206)
