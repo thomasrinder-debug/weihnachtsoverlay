@@ -27,6 +27,8 @@ class Pose:
     blick_y: float = 0.0
     schreck: float = 0.0      # 0..1: große Augen, offener Mund
     sorge: float = 0.0        # 0..1: ängstlich hochgezogene Brauen
+    muetze: bool = True       # ohne: Glatze mit Haarkranz
+    russ: float = 0.0         # 0..1: rußgeschwärztes Gesicht
 
 
 def geh_pose(phase, t):
@@ -178,6 +180,8 @@ def zeichne_kopf(p, pose, hy):
     kreis(p, 8, hy, 28)
     p.setBrush(radial(20, hy + 6, 10, QColor(240, 110, 110, 170), QColor(240, 110, 110, 0)))
     kreis(p, 20, hy + 6, 10)
+    if pose.russ:
+        zeichne_russ(p, 10, hy - 2, 27, pose.russ)
     if pose.auge_zu:
         lid = QPainterPath()
         lid.moveTo(20, hy - 6)
@@ -210,6 +214,11 @@ def zeichne_kopf(p, pose, hy):
     p.drawEllipse(QPointF(36, hy + 3), 6.5, 6)
     p.setBrush(QColor(255, 255, 255, 150))
     kreis(p, 34, hy + 0.5, 1.6)
+    if pose.russ:
+        zeichne_russ(p, 20, hy + 36, 18, pose.russ * 0.6)
+    if not pose.muetze:
+        zeichne_glatze(p, 8, hy)
+        return
     # Mütze
     w = pose.wipp
     muetze = QPainterPath()
@@ -242,7 +251,7 @@ def zeichne_weihnachtsmann(p, pose, zwischen=None):
         zeichne_arm(p, pose.arm_v_x, -140 + h, pose.arm_v, False)
     if pose.kopf_vorn:
         zeichne_kopf_vorn(p, 6, -188 + h, (pose.blick_x, pose.blick_y), pose.schreck, pose.sorge,
-                          pose.auge_zu, pose.wipp)
+                          pose.auge_zu, pose.wipp, pose.muetze, pose.russ)
     else:
         zeichne_kopf(p, pose, -186 + h)
     if zwischen:
@@ -264,7 +273,8 @@ def figur_kasten(x, y, s):
     return QRectF(x - 120 * s, y - 280 * s, 240 * s, 288 * s)
 
 
-def zeichne_kopf_vorn(p, x, y, blick=(0.0, 0.0), schreck=0.0, sorge=0.0, zu=False, wipp=0.0):
+def zeichne_kopf_vorn(p, x, y, blick=(0.0, 0.0), schreck=0.0, sorge=0.0, zu=False, wipp=0.0,
+                      muetze=True, russ=0.0):
     """Kopf von vorn, Mitte im Punkt (x, y), schaut die Zuschauer an."""
     p.save()
     p.translate(x, y)
@@ -278,6 +288,8 @@ def zeichne_kopf_vorn(p, x, y, blick=(0.0, 0.0), schreck=0.0, sorge=0.0, zu=Fals
     for cx in (-17, 17):
         p.setBrush(radial(cx, 7, 9, QColor(240, 110, 110, 170), QColor(240, 110, 110, 0)))
         kreis(p, cx, 7, 9)
+    if russ:
+        zeichne_russ(p, 0, -2, 27, russ)
     g = 1 + 0.35 * schreck
     for ax in (-10, 10):
         if zu:
@@ -318,6 +330,12 @@ def zeichne_kopf_vorn(p, x, y, blick=(0.0, 0.0), schreck=0.0, sorge=0.0, zu=Fals
     kreis(p, 0, 4, 6.5)
     p.setBrush(QColor(255, 255, 255, 150))
     kreis(p, -2, 1.5, 1.6)
+    if russ:
+        zeichne_russ(p, 0, 34, 22, russ * 0.6)
+    if not muetze:
+        zeichne_glatze(p, 0, 0, vorn=True)
+        p.restore()
+        return
     muetze = QPainterPath()
     muetze.moveTo(-30, -20)
     muetze.cubicTo(-28, -62, 22, -76, 44 + wipp, -46)
@@ -329,6 +347,44 @@ def zeichne_kopf_vorn(p, x, y, blick=(0.0, 0.0), schreck=0.0, sorge=0.0, zu=Fals
     tx, ty = 46 + wipp, -44
     flausch(p, [(tx + dx, ty + dy) for dx, dy in ((0, 0), (-4, -3), (4, -3), (-3, 4), (4, 3))], 6)
     p.restore()
+
+
+def zeichne_glatze(p, x, y, vorn=False):
+    """Glänzender Oberkopf mit Haarkranz, wenn die Mütze fehlt."""
+    p.setBrush(radial(x - 6, y - 20, 30, HAUT, HAUT_DUNKEL))
+    p.drawChord(QRectF(x - 27, y - 30, 54, 50), 0, 180 * 16)
+    p.setBrush(QColor(255, 255, 255, 170))
+    p.drawEllipse(QPointF(x - 8, y - 20), 6, 3)
+    if vorn:
+        flausch(p, [(x - 27, y - 8), (x - 29, y - 1), (x + 27, y - 8), (x + 29, y - 1)], 6)
+    else:
+        flausch(p, [(x - 18, y - 12), (x - 20, y - 4), (x - 14, y - 18)], 6)
+    p.setPen(stift(QColor(240, 240, 245), 1.6))
+    p.setBrush(KEIN_PINSEL)
+    for dx in (-3, 2):
+        p.drawArc(QRectF(x + dx - 4, y - 38, 8, 12), 200 * 16, 160 * 16)
+    p.setPen(KEIN_STIFT)
+
+
+def zeichne_russ(p, x, y, r, staerke):
+    """Rußflecken auf dem Gesicht."""
+    a = int(190 * staerke)
+    p.setBrush(radial(x, y, r, QColor(45, 40, 38, a), QColor(45, 40, 38, a // 3)))
+    kreis(p, x, y, r * 0.95)
+    p.setBrush(QColor(25, 22, 20, a))
+    for dx, dy, rr in ((-0.4, 0.3, 0.18), (0.35, -0.45, 0.14), (0.1, 0.55, 0.12)):
+        kreis(p, x + dx * r, y + dy * r, rr * r)
+
+
+def hand_punkt(x, y, s, richtung, pose, stauchen=1.0, neigung=0.0):
+    """Weltlage des vorderen Fäustlings, etwa um etwas hineinzugeben."""
+    w = math.radians(pose.arm_v)
+    lx = pose.arm_v_x - math.sin(w) * 56
+    ly = -140 + pose.hub + math.cos(w) * 56
+    lx *= s * richtung * (2 - stauchen)
+    ly *= s * stauchen
+    n = math.radians(neigung * richtung)
+    return x + lx * math.cos(n) - ly * math.sin(n), y + lx * math.sin(n) + ly * math.cos(n)
 
 
 def zeichne_schreckstriche(p, x, y, s):

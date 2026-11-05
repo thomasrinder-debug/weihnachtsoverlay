@@ -12,9 +12,10 @@ import argparse
 import pathlib
 import random
 
-from PyQt6.QtCore import QRectF, Qt
-from PyQt6.QtGui import QColor, QGuiApplication, QImage, QPainter, QPen
+from PyQt6.QtCore import QRect, QRectF, Qt
+from PyQt6.QtGui import QColor, QFont, QGuiApplication, QImage, QLinearGradient, QPainter, QPen
 
+import bildanalyse
 from szenen import finde_szenen
 from zeichnen.grundlagen import FIGUR_HOEHE
 
@@ -22,10 +23,39 @@ BREITE, HOEHE = 1920, 1080
 TAKT = 1 / 60
 
 
+def testbildschirm():
+    """Erfundener Bildschirm für Szenen, die mit dem echten Bildschirm spielen: ein Textfeld
+    mit Schreibmarke. Gibt (Bild, Schreibmarke)."""
+    bild = QImage(BREITE, HOEHE, QImage.Format.Format_RGB32)
+    p = QPainter(bild)
+    p.setRenderHint(QPainter.RenderHint.Antialiasing)
+    g = QLinearGradient(0, 0, BREITE, HOEHE)
+    g.setColorAt(0, QColor('#3E6E5A'))
+    g.setColorAt(1, QColor('#5A7FA8'))
+    p.fillRect(bild.rect(), g)
+    p.setPen(Qt.PenStyle.NoPen)
+    p.fillRect(QRect(380, 420, 1160, 300), QColor('white'))
+    p.setPen(QColor('#202020'))
+    p.setFont(QFont('Consolas', 13))
+    text = 'Frohe Weihnachten und ein gutes neues Jahr'
+    p.drawText(400, 520, text)
+    x1 = 400 + p.fontMetrics().horizontalAdvance(text)
+    marke = (x1 + 1, 503, x1 + 2, 526)
+    p.fillRect(QRect(marke[0], marke[1], 1, marke[3] - marke[1]), QColor('black'))
+    p.end()
+    return bild, marke
+
+
+def testdaten(art):
+    bild, marke = testbildschirm()
+    um = bildanalyse.Umrechnung(QRect(0, 0, BREITE, HOEHE), 1.0)
+    return bildanalyse.tippzeile_daten(bild, marke, um, 380)
+
+
 def lauf(klasse, s, schreck_bei=None, momente=(), bild=None):
     """Lässt eine Szene laufen; gibt (Dauer, Dauer nach Schreck, Bilder) zurück."""
     geo = QRectF(0, 0, BREITE, HOEHE)
-    sz = klasse(geo, s)
+    sz = klasse(geo, s, testdaten(klasse.braucht) if klasse.braucht else None)
     bilder = []
     momente = sorted(momente)
     while not sz.fertig and sz.t < 60:
@@ -34,14 +64,17 @@ def lauf(klasse, s, schreck_bei=None, momente=(), bild=None):
             sz.erschrecken()
         while momente and sz.t >= momente[0]:
             momente.pop(0)
-            bilder.append(schnappschuss(sz, geo))
+            bilder.append(schnappschuss(sz, geo, klasse.braucht))
     nach = sz.t - sz.te if sz.erschreckt else None
     return sz.t, sz.fertig, nach, bilder
 
 
-def schnappschuss(sz, geo):
-    f = QImage(BREITE, HOEHE, QImage.Format.Format_ARGB32)
-    f.fill(QColor('#5A7FA8'))
+def schnappschuss(sz, geo, braucht=None):
+    if braucht:
+        f = testbildschirm()[0].convertToFormat(QImage.Format.Format_ARGB32)
+    else:
+        f = QImage(BREITE, HOEHE, QImage.Format.Format_ARGB32)
+        f.fill(QColor('#5A7FA8'))
     p = QPainter(f)
     p.setRenderHint(QPainter.RenderHint.Antialiasing)
     if not sz.fertig:

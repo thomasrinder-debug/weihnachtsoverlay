@@ -130,3 +130,20 @@ def teilchen_kasten(liste):
     x1 = max(t.x for t in liste) + r
     y1 = max(t.y for t in liste) + r
     return QRectF(x0, y0, x1 - x0, y1 - y0)
+
+
+def bildstueck(p, bild, bildrechteck, stueck, mitte, winkel=0.0, groesse=1.0, deckkraft=1.0, unten=False):
+    """Zeichnet den Teil 'stueck' (logisches Rechteck) eines Bildschirmausschnitts 'bild', der das
+    logische Rechteck 'bildrechteck' bedeckt, mit seiner Mitte (unten=True: Unterkante) bei 'mitte',
+    gedreht und vergrößert."""
+    f = bild.width() / bildrechteck.width() if bildrechteck.width() else 1.0
+    quelle = QRectF((stueck.x() - bildrechteck.x()) * f, (stueck.y() - bildrechteck.y()) * f,
+                    stueck.width() * f, stueck.height() * f)
+    w, h = stueck.width(), stueck.height()
+    p.save()
+    p.translate(mitte)
+    p.rotate(winkel)
+    p.scale(groesse, groesse)
+    p.setOpacity(p.opacity() * deckkraft)
+    p.drawImage(QRectF(-w / 2, -h if unten else -h / 2, w, h), bild, quelle)
+    p.restore()

@@ -9,6 +9,11 @@ erschrickt der Weihnachtsmann und verschwindet.
 
 Die Szenen liegen einzeln im Ordner szenen/, das Zeichnen in zeichnen/.
 
+Einige Szenen spielen mit dem, was gerade zu sehen ist (getippter
+Text). Dafür holt abgreifen.py ein Bildschirmfoto und die Lage der
+Symbole bzw. der Schreibmarke; ohne passende Stelle fällt die Szene aus. Die
+Tippkatze kommt in der Automatik, wenn nach dem Tippen kurz Ruhe ist.
+
 Tastenkürzel (global):
   Strg+Alt+A      Automatik an/aus (Szenen von selbst, zufällige Pausen)
   Strg+Alt+W      nächste Szene (zufällige Reihenfolge)
@@ -26,6 +31,7 @@ from PyQt6.QtCore import QAbstractNativeEventFilter, QElapsedTimer, QRectF, Qt, 
 from PyQt6.QtGui import QIcon, QPainter, QPixmap
 from PyQt6.QtWidgets import QApplication, QMenu, QMessageBox, QSystemTrayIcon, QWidget
 
+import abgreifen
 from szenen import finde_szenen
 from zeichnen.figur import zeichne_kopf_vorn
 from zeichnen.grundlagen import FIGUR_HOEHE
@@ -59,6 +65,17 @@ def letzte_eingabe():
     return info.dwTime
 
 
+def ruhe_seit(zeitstempel):
+    """Sekunden seit einem Zeitstempel von letzte_eingabe()."""
+    return ((ctypes.windll.kernel32.GetTickCount() - zeitstempel) & 0xFFFFFFFF) / 1000
+
+
+def mauslage():
+    pt = wintypes.POINT()
+    user32.GetCursorPos(ctypes.byref(pt))
+    return pt.x, pt.y
+
+
 class Overlay(QWidget):
     def __init__(self, bildschirm, groesse, einmal, schreckhaft=True):
         super().__init__(None, Qt.WindowType.FramelessWindowHint
@@ -69,6 +86,7 @@ class Overlay(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
         self.setScreen(bildschirm)
+        self.bildschirm = bildschirm
         self.geo = QRectF(bildschirm.geometry())
         self.s = self.geo.height() * groesse / FIGUR_HOEHE
         self.einmal = einmal
@@ -97,13 +115,26 @@ class Overlay(QWidget):
         self.wecker = QTimer(self)
         self.wecker.setSingleShot(True)
         self.wecker.timeout.connect(self.von_selbst)
+        # Tippkatze: lauscht, ob getippt wird (Eingaben ohne Mausbewegung), und kommt,
+        # wenn danach 2 bis 4 Sekunden Ruhe ist.
+        self.katzenpause = (45.0, 240.0)
+        self.lauscher = QTimer(self)
+        self.lauscher.setInterval(150)
+        self.lauscher.timeout.connect(self.lauschen)
+        self.l_eingabe, self.l_maus = letzte_eingabe(), mauslage()
+        self.tasten = 0
+        self.katze_ab = 0.0
+        self.katze_nach = random.uniform(2.0, 4.0)
 
     def automatik_setzen(self, an):
         self.automatik = an
         if an:
             self.planen()
+            if 'tippkatze' in SZENEN:
+                self.lauscher.start()
         else:
             self.wecker.stop()
+            self.lauscher.stop()
 
     def planen(self):
         # logarithmisch verteilt: kurze Pausen kommen öfter vor, lange gibt es trotzdem
@@ -117,15 +148,47 @@ class Overlay(QWidget):
         else:
             self.start()
 
-    def start(self, name=None):
-        if self.szene:
+    def lauschen(self):
+        e, maus = letzte_eingabe(), mauslage()
+        if e != self.l_eingabe:
+            self.l_eingabe = e
+            if maus != self.l_maus:
+                self.l_maus, self.tasten = maus, 0
+            else:
+                self.tasten += 1
             return
-        if name is None:
-            if not self.reihe:
-                self.reihe = list(SZENEN)
-                random.shuffle(self.reihe)
-            name = self.reihe.pop()
-        self.szene = SZENEN[name](self.geo, self.s)
+        if self.tasten < 4:
+            return
+        ruhe = ruhe_seit(e)
+        if ruhe < self.katze_nach:
+            return
+        self.tasten = 0
+        self.katze_nach = random.uniform(2.0, 4.0)
+        jetzt = self.uhr.elapsed() / 1000
+        if ruhe < 6 and jetzt >= self.katze_ab and not self.szene and self.start('tippkatze'):
+            self.katze_ab = jetzt + random.uniform(*self.katzenpause)
+
+    def start(self, name=None):
+        """Startet eine Szene (ohne Namen: die nächste zufällige). False, wenn keine startet,
+        etwa weil eine Szene, die mit dem Bildschirm spielt, nichts Passendes findet."""
+        if self.szene:
+            return False
+        zufall = name is None
+        for _ in range(len(SZENEN)):
+            if zufall:
+                if not self.reihe:
+                    self.reihe = [n for n, k in SZENEN.items() if not k.nur_ausloeser]
+                    random.shuffle(self.reihe)
+                name = self.reihe.pop()
+            klasse = SZENEN[name]
+            daten = abgreifen.fuer(klasse.braucht, self.bildschirm) if klasse.braucht else None
+            if not klasse.braucht or daten:
+                break
+            if not zufall:
+                return False
+        else:
+            return False
+        self.szene = klasse(self.geo, self.s, daten)
         self.zuletzt = self.uhr.elapsed() / 1000
         self.alt = QRectF()
         self.eingabe = letzte_eingabe()
@@ -134,6 +197,7 @@ class Overlay(QWidget):
         self.nach_vorn()
         self.takt.start()
         self.vorn.start()
+        return True
 
     def stop(self):
         self.takt.stop()
@@ -209,6 +273,8 @@ def main():
     ap.add_argument('--pause', type=float, nargs=2, default=(20, 180), metavar=('KURZ', 'LANG'),
                     help='Pausen der Automatik in Sekunden (Standard: 20 180)')
     ap.add_argument('--manuell', action='store_true', help='Automatik beim Start aus, nur Tastenkürzel')
+    ap.add_argument('--katzenpause', type=float, nargs=2, default=(45, 240), metavar=('KURZ', 'LANG'),
+                    help='Abstand zwischen zwei Besuchen der Tippkatze in Sekunden (Standard: 45 240)')
     a = ap.parse_args()
 
     app = QApplication(sys.argv[:1])
@@ -232,6 +298,7 @@ def main():
     bildschirm = bildschirme[a.monitor - 1] if a.monitor else app.primaryScreen()
     overlay = Overlay(bildschirm, a.groesse, a.einmal, not a.mutig)
     overlay.pause = (max(1.0, min(a.pause)), max(a.pause))
+    overlay.katzenpause = (max(0.0, min(a.katzenpause)), max(a.katzenpause))
     namen = list(SZENEN)[:9]
 
     def taste(nr):
@@ -268,7 +335,10 @@ def main():
                            'Die Szenen lassen sich über dieses Symbol starten.',
                            QSystemTrayIcon.MessageIcon.Warning, 8000)
     if a.sofort is not None:
-        QTimer.singleShot(300, lambda: overlay.start(a.sofort or None))
+        def sofort():
+            if not overlay.start(a.sofort or None) and a.einmal:
+                app.quit()      # Szene fand nichts Passendes auf dem Bildschirm
+        QTimer.singleShot(300, sofort)
     code = app.exec()
     kernel32.CloseHandle(ctypes.c_void_p(sperre))
     sys.exit(code)
