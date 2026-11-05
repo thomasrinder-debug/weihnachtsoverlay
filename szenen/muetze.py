@@ -50,8 +50,9 @@ class Muetze(Szene):
         ]
 
     def schreck_ablauf(self):
-        if self.m and self.m[5]:
-            self.m[2], self.m[3], self.m[5] = self.naechster_rand() * 900 * self.s, -300 * self.s, False
+        if self.m:
+            seite = -1 if self.m[0] - self.geo.left() < self.geo.right() - self.m[0] else 1
+            self.m[2], self.m[3], self.m[5] = seite * 900 * self.s, -300 * self.s, False
             self.schweben = True
         if not self.figur_sichtbar():
             return [WarteBis(lambda sz: sz.m is None)]

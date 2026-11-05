@@ -69,8 +69,8 @@ class Gespann(Szene):
         return neu
 
     def weiter(self, dt):
-        if self.im_schlitten and random.random() < 0.6 or (not self.im_schlitten and self.rt.figur_sichtbar()
-                                                          and random.random() < 0.4):
+        rt = self.rt
+        if rt.zeige_figur and rt.figur_sichtbar() and random.random() < (0.6 if self.im_schlitten else 0.4):
             self.streue(self.schlitten_x() - self.rt.richtung * 60 * self.s, self.boden - 4 * self.s, 1, WEISS,
                         tempo=60, dauer=0.5, r=(2, 5))
         if not self.im_schlitten and self.zeige_figur and isinstance(self.aktuell, Stehe) and self.pose.mund_offen \

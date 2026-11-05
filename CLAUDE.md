@@ -6,7 +6,7 @@ Animierter Weihnachtsmann als durchsichtiges Overlay f체r Windows 11, gedacht f�
 
 - `weihnachtsmann.py`: Fenster, Tastenk체rzel, Infobereich, Automatik. Nur unter Windows lauff채hig (ctypes.windll).
 - `szenen/`: eine Datei pro Szene, wird automatisch gefunden. `szenen/basis.py` enth채lt `Szene` und die Bausteine (Schritte).
-- `zeichnen/`: `grundlagen.py` (Farben, Pelz, Teilchen), `figur.py` (Weihnachtsmann, Posen, Kopf von vorn), `requisiten.py` (Rentier, Schlitten, Fahrrad, Schornstein, Seil).
+- `zeichnen/`: `grundlagen.py` (Farben, Pelz, Teilchen), `figur.py` (Weihnachtsmann, Posen, Kopf von vorn), `figuren.py` (weitere Figuren: Schneemann, Wichtel, Lebkuchenmann, Pinguin, Nussknacker, Tannenbaum, Eisb채r, Rentier), `requisiten.py` (Rentier, Schlitten, Fahrrad, Schornstein, Seil, Geschenk, Lichterkette, Strumpf und anderes).
 - `pruefen.py`: rendert jede Szene ohne Fenster als Vorschaubild (`vorschau/<name>.png`) und testet den Schreck.
 
 `szenen/` und `zeichnen/` d체rfen nichts Windows-Spezifisches importieren, damit `pruefen.py` 체berall l채uft.
@@ -14,6 +14,8 @@ Animierter Weihnachtsmann als durchsichtiges Overlay f체r Windows 11, gedacht f�
 ## Eine neue Szene
 
 Neue Datei in `szenen/`, Klasse von `Szene`, mit `name`, `titel`, `reihenfolge`. In `ablauf()` die Schrittliste zur체ckgeben, Beispiel `szenen/spaziergang.py`. Eigener Zustand geh철rt in `vorbereiten()`, eigenes Zeichnen in `zeichne_hinten`/`zeichne_vorn`, zus채tzlicher Bereich in `grenzen_extra()`. Neue Zeichnungen (Requisiten) kommen nach `zeichnen/requisiten.py`. Fehlt ein Baustein, ihn allgemein in `szenen/basis.py` erg채nzen, nicht in der Szene nachbauen.
+
+Weitere Figuren sind Darsteller: in `vorbereiten()` mit `self.dazu('wichtel', Wichtel, groesse=0.7)` anlegen, dann laufen alle Schritte auch mit ihnen, etwa `Mit('wichtel', Gehe(bis=...))` oder im Hintergrund `Nebenbei(Mit(...))`. Bei mehreren Figuren liefert `self.schreck_alle()` den Standardschreck f체r alle. Staub, Schnee und Kr체mel 체ber `self.streue(...)`. Ideen und bereits umgesetzte Gags stehen in `szenen/IDEEN.md`.
 
 Vorgaben von Thomas:
 - **Nur an den Bildschirmr채ndern** (oben, unten, links, rechts); die Mitte mit den Folien bleibt frei.

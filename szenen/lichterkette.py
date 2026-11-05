@@ -82,7 +82,7 @@ class Lichterkette(Szene):
             return [Wandel(0.2, dose=0.0)]
         self.steckt, self.an, self.blitz, self.hopp = False, 0.0, False, 0.0
         self.nebenbei.clear()
-        return [Setze(stauchen=1.0), Erschrecke(0.35, 50), Renne(zum='zurueck', tempo=3.4, haltung=tragen),
+        return [Setze(stauchen=1.0), Erschrecke(0.35, 50), Renne(zum='rand', tempo=3.4, haltung=tragen),
                 Wandel(0.2, dose=0.0)]
 
     def weiter(self, dt):
