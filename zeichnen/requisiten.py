@@ -611,6 +611,7 @@ def zeichne_schneehaufen(p, x, y, b, h):
     """Weicher Schneehaufen am Boden, Mitte unten in (x, y), Breite b, Höhe h (Pixel)."""
     if h <= 0.5:
         return
+    p.setPen(KEIN_STIFT)
     pfad = QPainterPath()
     pfad.moveTo(x - b / 2, y + 2)
     pfad.cubicTo(x - b * 0.35, y - h * 0.9, x - b * 0.15, y - h * 1.05, x, y - h)
