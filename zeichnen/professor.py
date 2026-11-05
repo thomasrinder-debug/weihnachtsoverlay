@@ -7,7 +7,8 @@ und t; eigene Merkmale (alle freiwillig):
     haar_farbe QColor, sonst Weiß
     gluehen    0..1  Haare leuchten (Tesla-Spule)
     brille     0..1  Brille rutscht schief
-    russ       0..1  rußiges Gesicht (bleibt, egal welche Pose)
+    russ       0..1  rußiges Gesicht (bleibt, egal welche Pose), bei 1 pechschwarz
+    verkohlt   0..1  Haare grau verkohlt, Mütze angesengt
     muetze     False: Mütze ist weg (fliegt gerade, hängt woanders)
     halt       Funktion halt(p, hx, hy): zeichnet, was er in der vorderen Hand hält
                (in Figur-Einheiten, vor dem Kittel, hinter dem Ärmel)
@@ -18,7 +19,6 @@ import math
 from PyQt6.QtCore import QPointF, QRectF
 from PyQt6.QtGui import QColor, QPainterPath, QTransform
 
-from .figur import zeichne_russ
 from .grundlagen import *  # noqa: F401,F403  Farben und Hilfen
 
 KITTEL = QColor('#F4F7FA')
@@ -171,7 +171,12 @@ def _haare(p, x, y, d, seiten):
         p.setBrush(radial(x, y - 10, 70, QColor(170, 220, 255, int(170 * gluehen)), QColor(170, 220, 255, 0)))
         kreis(p, x, y - 10, 70)
         farbe = QColor(farbe).lighter(100 + int(15 * gluehen))
+    kohle = getattr(d, 'verkohlt', 0.0)
+    if kohle:
+        farbe = mische(farbe, QColor(120, 114, 108), 0.7 * kohle)
     schatten = QColor(farbe).darker(125) if farbe != HAAR else HAAR_SCHATTEN
+    if kohle:
+        schatten = mische(schatten, QColor(40, 36, 34), kohle)
     t = d.t
     a0, a1 = seiten
     n = 9
@@ -189,7 +194,7 @@ def zeichne_muetze_prof(p, x, y, wipp=0.0):
     _muetze(p, x, y + 14, wipp, 0.0)
 
 
-def _muetze(p, x, y, wipp, hoch):
+def _muetze(p, x, y, wipp, hoch, kohle=0.0):
     """Kleine Weihnachtsmütze, die auf den Haaren sitzt (bei hoch=1 obenauf)."""
     y -= 22 * hoch
     m = QPainterPath()
@@ -199,9 +204,34 @@ def _muetze(p, x, y, wipp, hoch):
     m.cubicTo(x - 20, y - 40, x - 18, y - 30, x - 20, y - 14)
     p.setBrush(linear(x - 24, y - 50, x + 20, y - 14, ROT_HELL, ROT_DUNKEL))
     p.drawPath(m)
+    if kohle:
+        p.setBrush(linear(x + 10, y - 40, x - 26, y - 40, QColor(40, 30, 28, 0), QColor(40, 30, 28, int(230 * kohle))))
+        p.drawPath(m)
     flausch(p, [(x + dx, y - 15) for dx in range(-20, 22, 6)], 6)
     tx, ty = x - 28 + wipp, y - 38
-    flausch(p, [(tx + dx, ty + dy) for dx, dy in ((0, 0), (-3, -3), (3, -3), (-3, 3), (3, 3))], 5)
+    if kohle:
+        p.setBrush(QColor(55, 50, 48))
+        for dx, dy in ((0, 0), (-3, -3), (3, -3), (-3, 3), (3, 3)):
+            kreis(p, tx + dx, ty + dy, 4)
+        p.setBrush(QColor(255, 140, 40, int(200 * kohle)))
+        kreis(p, tx + 1, ty - 1, 2)
+    else:
+        flausch(p, [(tx + dx, ty + dy) for dx, dy in ((0, 0), (-3, -3), (3, -3), (-3, 3), (3, 3))], 5)
+
+
+def mische(a, b, f):
+    return QColor(int(a.red() + (b.red() - a.red()) * f), int(a.green() + (b.green() - a.green()) * f),
+                  int(a.blue() + (b.blue() - a.blue()) * f), a.alpha())
+
+
+def _russ(p, x, y, staerke):
+    """Rußgesicht: aschgrau verschmiert, dunkle Flecken, ein heller Streifen über den Augen."""
+    a = int(225 * staerke)
+    p.setBrush(radial(x - 4, y - 6, 30, QColor(150, 146, 142, a), QColor(96, 92, 90, a)))
+    p.drawEllipse(QPointF(x, y), 22.5, 24.5)
+    p.setBrush(QColor(60, 56, 54, int(a * 0.85)))
+    for dx, dy, rr in ((-12, 12, 6), (14, -14, 5), (6, 18, 4.5), (-16, -10, 4), (15, 8, 3.5)):
+        kreis(p, x + dx, y + dy, rr)
 
 
 def _auge_hinter_glas(p, x, y, r, pose, blick):
@@ -248,16 +278,16 @@ def _kopf_seite(p, d, x, y):
     kreis(p, x + 15, y + 8, 8)
     russ = max(pose.russ, getattr(d, 'russ', 0.0))
     if russ:
-        zeichne_russ(p, x + 4, y, 23, russ)
+        _russ(p, x, y, russ)
     schief = getattr(d, 'brille', 0.0)
-    gy = y - 4 + 5 * schief
+    gy = y - 4 + 8 * schief
     _auge_hinter_glas(p, x + 15, y - 4, 9, pose, (1.0 if not pose.kopf_vorn else 0, pose.blick_y))
     p.setPen(stift(BRILLE, 1.8))
     p.drawLine(QPointF(x + 7, gy - 1), QPointF(x - 8, y - 2))
     p.setPen(KEIN_STIFT)
     p.save()
     p.translate(x + 15, gy)
-    p.rotate(14 * schief)
+    p.rotate(28 * schief)
     _glas(p, 0, 0, 9)
     p.restore()
     # buschige Braue
@@ -280,7 +310,7 @@ def _kopf_seite(p, d, x, y):
         p.drawArc(QRectF(x + 11, y + 8, 11, 7), 200 * 16, 130 * 16)
         p.setPen(KEIN_STIFT)
     if pose.muetze and getattr(d, 'muetze', True):
-        _muetze(p, x - 2, y - 2, pose.wipp, getattr(d, 'haare', 0.0))
+        _muetze(p, x - 2, y - 2, pose.wipp, getattr(d, 'haare', 0.0), getattr(d, 'verkohlt', 0.0))
 
 
 def _kopf_vorn(p, d, x, y):
@@ -300,13 +330,13 @@ def _kopf_vorn(p, d, x, y):
         kreis(p, x + seite * 13, y + 9, 7)
     russ = max(pose.russ, getattr(d, 'russ', 0.0))
     if russ:
-        zeichne_russ(p, x, y, 23, russ)
+        _russ(p, x, y, russ)
     schief = getattr(d, 'brille', 0.0)
     for seite in (-1, 1):
         _auge_hinter_glas(p, x + seite * 9, y - 4, 8.5, pose, (pose.blick_x, pose.blick_y))
     p.save()
     p.translate(x, y - 4)
-    p.rotate(12 * schief)
+    p.rotate(26 * schief)
     for seite in (-1, 1):
         _glas(p, seite * 9.5, 0, 8.5)
     p.setPen(stift(BRILLE, 1.8))
@@ -340,7 +370,7 @@ def _kopf_vorn(p, d, x, y):
         p.translate(x, y)
         p.rotate(-8)
         p.scale(-1, 1)
-        _muetze(p, 0, 0, pose.wipp, hoch)
+        _muetze(p, 0, 0, pose.wipp, hoch, getattr(d, 'verkohlt', 0.0))
         p.restore()
 
 

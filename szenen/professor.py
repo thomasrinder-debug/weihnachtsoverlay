@@ -3,8 +3,10 @@ Weihnachtsmanns, alle Schritte aus basis.py laufen mit ihm. Requisiten zeichnet 
 Szene in zeichne_requisiten(), ihren Umriss liefert requisiten_kasten(); beim Schreck
 verschwinden sie mit weg() in einer Wolke.
 
-Running Gag: die Triumph-Pose (Füße breit, beide Hände offen), genau dann geht
-meistens etwas schief.
+Running Gags: die Triumph-Pose (Füße breit, beide Hände offen), genau dann geht
+etwas schief; danach der trockene Blick ins Publikum (Publikumsblick) mit
+Blinzeln und einem Hustwölkchen. Nach einem Knall qualmen Haare und Mütze weiter
+(qualm), bis die Szene endet.
 """
 import math
 import random
@@ -14,7 +16,7 @@ from PyQt6.QtCore import QPointF, QRectF
 from PyQt6.QtGui import QColor
 
 from zeichnen.figur import Pose
-from zeichnen.grundlagen import KEIN_STIFT, WEISS, blinzeln, glatt, stift, teilchen_kasten
+from zeichnen.grundlagen import KEIN_STIFT, WEISS, blinzeln, glatt, kreis, radial, stift, teilchen_kasten
 from zeichnen.labor import (KREIDE, anschrieb_breite, kreide_striche, striche_spitze, tafel_flaeche, zeichne_kreide,
                             zeichne_schwamm, zeichne_striche, zeichne_tafel)
 from zeichnen.professor import ARM_LAENGE, SCHULTER_Y, Professor, hand_lokal, professor_trafo
@@ -25,6 +27,8 @@ from .basis import (Erschrecke, Gehe, Mit, Nebenbei, Renne, Schritt, Setze, Steh
 RAUCH = [QColor(235, 235, 240, 220), QColor(200, 200, 210, 200), WEISS]
 RUSS = [QColor(70, 64, 60, 220), QColor(110, 100, 95, 200), QColor(50, 46, 44, 230)]
 FUNKEN = [QColor('#FFE38F'), QColor('#FFB43C'), WEISS]
+STAUB = [QColor(210, 200, 185, 190), QColor(180, 170, 155, 170)]
+QUALM = [QColor(80, 76, 74, 200), QColor(60, 57, 55, 190), QColor(130, 126, 122, 190)]
 
 
 def triumph_pose(sz, u=0.0):
@@ -51,11 +55,21 @@ class ProfSzene(Szene):
     halt = None
     halt_h = None
     weg_ist = False
+    russ = 0.0
+    verkohlt = 0.0
+    qualm = 0.0          # 0..1: Haare und Mütze rauchen
+    blitz_t = None       # Beginn des Explosionsblitzes
+    blitz_ort = (0.0, 0.0)
+    blitz_r = 0.0
     senke = 0.0          # Requisiten versinken beim Schreck unter der Unterkante
     mitnehmen = ()       # Namen von x-Werten (z. B. 'tafel_x'), die mit ihm mitwandern
     _x_alt = None
 
     def weiter(self, dt):
+        if self.qualm and self.zeige_figur and not self.erschreckt and random.random() < self.qualm * 0.45:
+            x, y = self.kopf_oben()
+            self.streue(x + random.uniform(-14, 14) * self.s, y, 1, QUALM, tempo=45, dauer=1.2, r=(6, 11),
+                        richtung=-math.pi / 2, streuung=0.4)
         if self.mitnehmen and self._x_alt is not None and not self.erschreckt:
             for name in self.mitnehmen:
                 setattr(self, name, getattr(self, name) + self.x - self._x_alt)
@@ -81,6 +95,14 @@ class ProfSzene(Szene):
 
     def striche_punkt(self):
         q = self.trafo().map(QPointF(*Professor.KOPF))
+        return q.x(), q.y()
+
+    def kopf_oben(self):
+        q = self.trafo().map(QPointF(4, -232 - 26 * self.haare))
+        return q.x(), q.y()
+
+    def mund(self):
+        q = self.trafo().map(QPointF(6 if self.pose.kopf_vorn else 22, -160))
         return q.x(), q.y()
 
     def hand(self, vorn=True):
@@ -122,6 +144,21 @@ class ProfSzene(Szene):
             p.translate(0, self.senke)
             self.zeichne_davor(p)
             p.restore()
+        b = self.blitz()
+        if b:
+            x, y, r, a = b
+            p.setPen(KEIN_STIFT)
+            p.setBrush(radial(x, y, r, QColor(255, 255, 235, int(250 * a)), QColor(255, 200, 80, 0)))
+            kreis(p, x, y, r)
+
+    def blitz(self):
+        """(x, y, Radius, Deckkraft) des Explosionsblitzes oder None."""
+        if self.blitz_t is None:
+            return None
+        u = (self.t - self.blitz_t) / 0.3
+        if u >= 1:
+            return None
+        return self.blitz_ort[0], self.blitz_ort[1], self.blitz_r * (0.6 + 0.4 * u), 1 - u
 
     def grenzen_extra(self):
         if self.weg_ist:
@@ -144,6 +181,10 @@ class ProfSzene(Szene):
 
     def grenzen(self):
         k = QRectF()
+        b = self.blitz()
+        if b:
+            x, y, r, _ = b
+            k = QRectF(x - r, y - r, 2 * r, 2 * r).intersected(self.geo)
         if self.zeige_figur:
             k = self.figur_kasten().adjusted(-4 * self.s, -34 * self.s * (1 + self.haare), 4 * self.s, 0)
         k = k.united(self.grenzen_extra())
@@ -238,6 +279,85 @@ class ProfSzene(Szene):
                                  Renne(zum='rand', tempo=4.5,
                                        haltung=lambda p, sz: replace(p, arm_v=-20, arm_h=20, schreck=1.0)),
                                  ] + self._ende()
+
+
+class Knall(Tu):
+    """Der große Knall: greller Blitz, Rauchwolke von zwei bis drei Figurenhöhen, danach
+    Rußgesicht, Haare zu Berge, Brille schief, Mütze angesengt, alles qualmt.
+    ort(sz) -> (x, y) Mittelpunkt, sonst kurz vor seinem Gesicht. groesse 1 = Standard."""
+
+    def __init__(self, ort=None, groesse=1.0, russ=True):
+        super().__init__(self.knallen)
+        self.ort, self.groesse, self.russ = ort, groesse, russ
+
+    def knallen(self, sz):
+        s, g = sz.s, self.groesse
+        x, y = self.ort(sz) if self.ort else sz.hand()
+        sz.blitz_t, sz.blitz_ort, sz.blitz_r = sz.t, (x, y), 230 * s * g
+        for _ in range(int(46 * g)):
+            w = random.uniform(0, 2 * math.pi)
+            d = random.uniform(0, 90) * s * g
+            sz.streue(x + math.cos(w) * d, y + math.sin(w) * d * 0.7, 1, RAUCH + QUALM, tempo=280 * g, dauer=1.6,
+                      r=(22 * g, 44 * g))
+        sz.streue(x, y, int(16 * g), FUNKEN, tempo=420 * g, dauer=0.7, r=(3, 6), art='stern')
+        if self.russ:
+            sz.russ, sz.haare, sz.brille, sz.verkohlt, sz.qualm = 1.0, 1.0, 1.0, 1.0, 1.0
+
+
+def explodiert(sz, u):
+    """Pose nach dem Knall: steif wie ein Brett, Augen weit, Arme vom Körper."""
+    return Pose(kopf_vorn=True, schreck=1.0 if u < 0.5 else 0.0, arm_v=-35, arm_h=35, bein_v=-6, bein_h=6,
+                mund_offen=u >= 0.5, auge_zu=False)
+
+
+class Publikumsblick(Stehe):
+    """Der trockene Blick ins Publikum: steht still, schaut die Zuschauer an, blinzelt
+    zweimal langsam und hustet ein Rauchwölkchen. Nach jedem Unglück derselbe Blick."""
+
+    def __init__(self, dauer=1.2, husten=True):
+        super().__init__(dauer, self.blick)
+        self.husten, self.gehustet = husten, False
+
+    def beginn(self, sz):
+        self.gehustet = False
+
+    @staticmethod
+    def blick(sz, u):
+        return Pose(kopf_vorn=True, auge_zu=0.25 < u < 0.42 or 0.8 < u < 0.95,
+                    mund_offen=0.55 < u < 0.72, sorge=0.15)
+
+    def weiter(self, sz, u, dt):
+        super().weiter(sz, u, dt)
+        if self.husten and not self.gehustet and u > 0.58:
+            self.gehustet = True
+            x, y = sz.mund()
+            sz.streue(x, y, 5, QUALM, tempo=55, dauer=0.9, r=(5, 10), richtung=-math.pi / 2, streuung=0.8)
+            sz.hopp = 0.0
+
+
+def wuerde_pose(sz, u):
+    """Würde reparieren: zieht mit beiden Händen den Kittel glatt, Kinn hoch, Augen zu."""
+    zug = abs(math.sin(u * math.pi * 2.5))
+    return Pose(kopf_vorn=True, arm_v=12 + 14 * zug, arm_h=-12 - 14 * zug, arm_v_x=14, hub=-2 * zug,
+                auge_zu=True, blick_y=-0.5)
+
+
+class Umkippen(Schritt):
+    """Kippt steif wie ein Brett um (nach=-1 rückwärts, 1 vorwärts), federt kurz nach,
+    Staub am Boden. Er bleibt liegen, bis ein späterer Schritt neigung zurücksetzt."""
+
+    def __init__(self, dauer=0.5, nach=-1):
+        self.dauer, self.nach = dauer, nach
+
+    def weiter(self, sz, u, dt):
+        f = min(1.0, u / self.dauer) ** 2
+        sz.neigung = 88 * self.nach * f
+        sz.pose = Pose(kopf_vorn=True, auge_zu=f > 0.9, arm_v=-8, arm_h=8, mund_offen=f < 0.9)
+
+    def ende(self, sz):
+        k = sz.figur_kasten()
+        sz.streue(k.center().x(), sz.boden - 6 * sz.s, 10, STAUB, tempo=110, dauer=0.6, r=(5, 10),
+                  richtung=-math.pi / 2, streuung=1.4)
 
 
 class HaareHoch(Tu):
