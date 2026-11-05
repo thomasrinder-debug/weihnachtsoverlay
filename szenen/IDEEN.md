@@ -26,8 +26,23 @@ Bewusst weggelassen: alles Religiöse (Krippe, Engel, Christkind, Heilige, Stern
 | baerspaeht | Seite | Eisbär fängt Schneeflocken mit der Zunge und niest |
 | gespann | unten | Rentier rennt mit leerem Schlitten weg und holt ihn dann ab |
 
-## Noch offen
+## Zweite Runde
 
-- Geschenketurm: er balanciert einen wackelnden Stapel und rennt unter dem kippenden Turm hin und her.
-- Plätzchenteller: eine Hand greift vom Seitenrand nach Keksen, ein Wichtel klopft ihr auf die Finger.
-- Zuckerstange als Haken: er hängt am oberen Rand und schaukelt wie am Trapez.
+Die Vorschläge stammen aus einem Dialog mit ChatGPT; weggelassen wurden die, die es oben schon ähnlich gibt (Eisbär, Lichterkette, Strumpf, Nussknacker, Schneeball). Running Gag: ein Wichtel mit steifer Mütze, deren Spitze rechtwinklig abknickt. Nach einer Panne richtet er sie würdevoll gerade, und sie knickt sofort wieder ab (`muetze_richten()` in `basis.py`, Figur `WichtelSteif`).
+
+| Name | Rand | Gag |
+|---|---|---|
+| eiszapfen | oben, Ecke | Wichtel poliert einen Eiszapfen, der bricht, unten poliert er das Bruchstück weiter (Mützen-Gag) |
+| rodeln | Seite | senkrecht die Kante hinunterrodeln, mit dem Schlitten die Wand wieder hinaufmarschieren (Mützen-Gag) |
+| skisprung | unten | flacher Sprung, kopfüber in der Wehe, die Ski stellen sich brav parallel |
+| topf | unten | Schneemann baut sich, ein Kochtopf drückt ihn zur Ziehharmonika zusammen |
+| zimtstern | unten | Eichhörnchen zerrt am Riesen-Zimtstern, beißt eine Zacke ab, rollt ihn kippelnd davon |
+| nieslawine | Ecke | Flocke auf der Nase, Niesen, Lawine, nur die Mütze schaut heraus |
+| schal | unten | Wichtel wickelt sich zur Wolltonne, die Mütze versinkt obenauf |
+| besen | unten | der Besen fegt den Wichtel aufs Kehrblech (Mützen-Gag) |
+| geschenkband | unten | Wichtel verschnürt sich selbst und rückt die Schleife gerade |
+| keks | unten | harter Keks sägt ein Tännchen ab, die Spitze landet als Mütze |
+| schaufel | unten | geschippter Schnee kommt als Würfel zurück, immer wieder |
+| turm | unten | Geschenketurm auf dem Kopf, Balancieren, Kippen |
+| plaetzchen | unten + Seite | Hand stibitzt Plätzchen, Wichtel haut mit dem Kochlöffel drauf |
+| trapez | oben | Trapez aus Zuckerstangen, kopfüber winken, Abflug über den Rand |

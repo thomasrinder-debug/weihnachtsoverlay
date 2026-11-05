@@ -783,3 +783,22 @@ def zeichne_schneewuerfel(p, x, y, a, dreh=0.0):
     p.setBrush(QColor(255, 255, 255, 230))
     stern(p, -h * 0.4, -h * 0.4, a * 0.08)
     p.restore()
+
+
+def zeichne_zuckerstange(p, laenge, haken=True, breite=9):
+    """Zuckerstange von (0, 0) nach (0, laenge); mit Haken oben, der nach rechts umbiegt."""
+    pfad = QPainterPath()
+    if haken:
+        pfad.moveTo(22, 10)
+        pfad.cubicTo(24, -14, 0, -14, 0, 6)
+    else:
+        pfad.moveTo(0, 0)
+    pfad.lineTo(0, laenge)
+    p.setBrush(KEIN_PINSEL)
+    p.setPen(QPen(WEISS, breite, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
+    p.drawPath(pfad)
+    streifen = QPen(ROT, breite, Qt.PenStyle.CustomDashLine, Qt.PenCapStyle.FlatCap)
+    streifen.setDashPattern([0.8, 0.8])
+    p.setPen(streifen)
+    p.drawPath(pfad)
+    p.setPen(KEIN_STIFT)
