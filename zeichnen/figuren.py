@@ -734,7 +734,7 @@ class Eisbaer:
     def zeichne(p, d):
         pose, t = d.pose, d.t
         liegt = getattr(d, 'liegt', 0.0)
-        tief = 40 * liegt
+        tief = 30 * liegt
         atmen = math.sin(t * 2.2) * 2 * liegt
 
         def bein(x, winkel, hinten):
