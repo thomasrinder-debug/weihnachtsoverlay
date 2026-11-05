@@ -379,17 +379,18 @@ def zeichne_feder(p, x, unten, oben, breite=16, windungen=6):
 LICHTER = (QColor('#FF4D4D'), QColor('#FFD23F'), QColor('#3FA7FF'), QColor('#5BE06A'), QColor('#FF7AE0'))
 
 
-def zeichne_lichterkette(p, pfad, s, an, t, abstand=34):
+def zeichne_lichterkette(p, pfad, s, an, t, abstand=34, groesse=1.0):
     """Kabel entlang pfad (QPainterPath in Pixeln) mit Birnchen alle 'abstand' Einheiten.
     an: 0..1 Helligkeit, die Birnchen blinken versetzt."""
+    k = s * groesse
     p.setBrush(KEIN_PINSEL)
-    p.setPen(stift(QColor('#1E4A2A'), 2.6 * s))
+    p.setPen(stift(QColor('#1E4A2A'), 2.6 * k))
     p.drawPath(pfad)
     p.setPen(KEIN_STIFT)
     laenge = pfad.length()
-    n = int(laenge / (abstand * s))
+    n = int(laenge / (abstand * k))
     for i in range(1, n + 1):
-        anteil = pfad.percentAtLength(i * abstand * s - abstand * s * 0.5)
+        anteil = pfad.percentAtLength(i * abstand * k - abstand * k * 0.5)
         pt = pfad.pointAtPercent(anteil)
         w = -pfad.angleAtPercent(anteil)
         farbe = LICHTER[i % len(LICHTER)]
@@ -399,16 +400,16 @@ def zeichne_lichterkette(p, pfad, s, an, t, abstand=34):
             schein.setAlpha(int(150 * hell))
             aus = QColor(farbe)
             aus.setAlpha(0)
-            p.setBrush(radial(pt.x(), pt.y(), 13 * s, schein, aus))
-            kreis(p, pt.x(), pt.y(), 13 * s)
+            p.setBrush(radial(pt.x(), pt.y(), 13 * k, schein, aus))
+            kreis(p, pt.x(), pt.y(), 13 * k)
         p.save()
         p.translate(pt)
         p.rotate(w)
         p.setBrush(QColor('#2E6B3A'))
-        p.drawRect(QRectF(-2.6 * s, 0, 5.2 * s, 4 * s))
+        p.drawRect(QRectF(-2.6 * k, 0, 5.2 * k, 4 * k))
         innen = farbe.lighter(100 + int(70 * hell)) if hell > 0.05 else farbe.darker(170)
-        p.setBrush(radial(-1 * s, 7 * s, 6 * s, innen, farbe.darker(120 if hell > 0.05 else 220)))
-        p.drawEllipse(QRectF(-4 * s, 3 * s, 8 * s, 11 * s))
+        p.setBrush(radial(-1 * k, 7 * k, 6 * k, innen, farbe.darker(120 if hell > 0.05 else 220)))
+        p.drawEllipse(QRectF(-4 * k, 3 * k, 8 * k, 11 * k))
         p.restore()
 
 
