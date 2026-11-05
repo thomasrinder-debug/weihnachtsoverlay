@@ -6,7 +6,7 @@ Ein kleiner, schreckhafter Weihnachtsmann, der unter Windows 11 am Bildschirmran
 
 Unter „Releases“ auf GitHub `Weihnachtsmann-Setup-<version>.exe` herunterladen und starten. Das Setup braucht keine Adminrechte; es installiert nach `%LOCALAPPDATA%\Programs\Weihnachtsmann`, legt Verknüpfungen im Startmenü und auf dem Desktop an und startet das Overlay. Entfernen über Windows-Einstellungen → Apps → „Weihnachtsmann-Overlay“. Das Setup ist nicht signiert, Windows SmartScreen fragt deshalb beim ersten Start nach („Weitere Informationen“ → „Trotzdem ausführen“).
 
-Setup selbst bauen: `.venv\Scripts\python.exe -m pip install pyinstaller`, dann `.venv\Scripts\python.exe installerbauen.py 1.0.0`; das Ergebnis liegt in `dist/`.
+Setup selbst bauen: `.venv\Scripts\python.exe -m pip install pyinstaller`, dann `.venv\Scripts\python.exe installer\bauen.py 1.0.0`; das Ergebnis liegt in `dist/`.
 
 ## Starten aus dem Quellcode
 
