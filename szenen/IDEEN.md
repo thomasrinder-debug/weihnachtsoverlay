@@ -28,14 +28,13 @@ Bewusst weggelassen: alles Religiöse (Krippe, Engel, Christkind, Heilige, Stern
 
 ## Zweite Runde
 
-Die Vorschläge stammen aus einem Dialog mit ChatGPT; weggelassen wurden die, die es oben schon ähnlich gibt (Eisbär, Lichterkette, Strumpf, Nussknacker, Schneeball). Running Gag: ein Wichtel mit steifer Mütze, deren Spitze rechtwinklig abknickt. Nach einer Panne richtet er sie würdevoll gerade, und sie knickt sofort wieder ab (`muetze_richten()` in `basis.py`, Figur `WichtelSteif`).
+Die Vorschläge stammen aus einem Dialog mit ChatGPT; weggelassen wurden die, die es oben schon ähnlich gibt (Eisbär, Lichterkette, Strumpf, Nussknacker, Schneeball, Schneemann baut sich selbst). Running Gag: ein Wichtel mit steifer Mütze, deren Spitze rechtwinklig abknickt. Nach einer Panne richtet er sie würdevoll gerade, und sie knickt sofort wieder ab (`muetze_richten()` in `basis.py`, Figur `WichtelSteif`).
 
 | Name | Rand | Gag |
 |---|---|---|
 | eiszapfen | oben, Ecke | Wichtel poliert einen Eiszapfen, der bricht, unten poliert er das Bruchstück weiter (Mützen-Gag) |
 | rodeln | Seite | senkrecht die Kante hinunterrodeln, mit dem Schlitten die Wand wieder hinaufmarschieren (Mützen-Gag) |
 | skisprung | unten | flacher Sprung, kopfüber in der Wehe, die Ski stellen sich brav parallel |
-| topf | unten | Schneemann baut sich, ein Kochtopf drückt ihn zur Ziehharmonika zusammen |
 | zimtstern | unten | Eichhörnchen zerrt am Riesen-Zimtstern, beißt eine Zacke ab, rollt ihn kippelnd davon |
 | nieslawine | Ecke | Flocke auf der Nase, Niesen, Lawine, nur die Mütze schaut heraus |
 | schal | unten | Wichtel wickelt sich zur Wolltonne, die Mütze versinkt obenauf |

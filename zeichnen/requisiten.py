@@ -624,21 +624,6 @@ def zeichne_schneehaufen(p, x, y, b, h):
         kreis(p, x + dx * b, y - dy * h, max(1.0, r * b))
 
 
-def zeichne_topf(p):
-    """Alter Kochtopf als Hut, Rand mittig im Ursprung (Öffnung nach unten)."""
-    p.setBrush(linear(-26, 0, 26, 0, QColor('#C9CDD4'), QColor('#6C727C')))
-    p.drawRoundedRect(QRectF(-24, -34, 48, 34), 4, 4)
-    p.setBrush(linear(-29, 0, 29, 0, QColor('#DDE1E6'), QColor('#7A808A')))
-    p.drawRoundedRect(QRectF(-29, -5, 58, 7), 3, 3)
-    p.setBrush(QColor('#4A4F57'))
-    p.drawRoundedRect(QRectF(-36, -26, 9, 5), 2, 2)
-    p.drawRoundedRect(QRectF(27, -26, 9, 5), 2, 2)
-    p.setBrush(QColor(255, 255, 255, 120))
-    p.drawRect(QRectF(-16, -31, 5, 24))
-    p.setBrush(QColor(120, 70, 40, 90))
-    kreis(p, 10, -14, 3)
-
-
 def zeichne_zimtstern(p, r, fehlt=-1):
     """Zimtstern mit Eiweißglasur, Mitte im Ursprung. fehlt: Index der abgebissenen Zacke."""
     def stern_pfad(ra, ri):
