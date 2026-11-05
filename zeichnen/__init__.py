@@ -1,0 +1,1 @@
+"""Zeichenbausteine: Grundformen, Figur, Requisiten."""
