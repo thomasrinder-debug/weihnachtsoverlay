@@ -7,13 +7,14 @@ Animierter Weihnachtsmann als durchsichtiges Overlay für Windows 11, gedacht f�
 - `weihnachtsmann.py`: Fenster, Tastenkürzel, Infobereich, Automatik. Nur unter Windows lauffähig (ctypes.windll).
 - `szenen/`: eine Datei pro Szene, wird automatisch gefunden. `szenen/basis.py` enthält `Szene` und die Bausteine (Schritte).
 - `zeichnen/`: `grundlagen.py` (Farben, Pelz, Teilchen), `figur.py` (Weihnachtsmann, Posen, Kopf von vorn), `figuren.py` (weitere Figuren: Schneemann, Wichtel, Lebkuchenmann, Pinguin, Nussknacker, Tannenbaum, Eisbär, Rentier), `requisiten.py` (Rentier, Schlitten, Fahrrad, Schornstein, Seil, Geschenk, Lichterkette, Strumpf und anderes).
+- Der verrückte Professor: Figur in `zeichnen/professor.py`, Laborrequisiten und Kreideschrift in `zeichnen/labor.py` (weitere in `labor_a.py` bis `labor_f.py`), gemeinsame Bausteine in `szenen/professor.py` (`ProfSzene` mit dem Professor als Hauptfigur, `TafelSzene`, Schreck-Varianten, Triumph-Pose, `Knall`, `Publikumsblick`, `Umkippen`), Computer-Grundlage in `szenen/geraet.py`. Jede Professor-Szene folgt Aufbau – Steigerung – Knall – Reaktion in 8–12 s, mit großen, körperlichen Pointen (siehe `szenen/IDEEN.md`). Seine Szenen heißen `szenen/prof_*.py`. Auf seiner Tafel sind Ziffern, Rechenzeichen und einfache Gleichungen erlaubt, keine Wörter.
 - `pruefen.py`: rendert jede Szene ohne Fenster als Vorschaubild (`vorschau/<name>.png`) und testet den Schreck.
 
 `szenen/` und `zeichnen/` dürfen nichts Windows-Spezifisches importieren, damit `pruefen.py` überall läuft.
 
 ## Eine neue Szene
 
-Neue Datei in `szenen/`, Klasse von `Szene`, mit `name`, `titel`, `reihenfolge`. In `ablauf()` die Schrittliste zurückgeben, Beispiel `szenen/spaziergang.py`. Eigener Zustand gehört in `vorbereiten()`, eigenes Zeichnen in `zeichne_hinten`/`zeichne_vorn`, zusätzlicher Bereich in `grenzen_extra()`. Neue Zeichnungen (Requisiten) kommen nach `zeichnen/requisiten.py`. Fehlt ein Baustein, ihn allgemein in `szenen/basis.py` ergänzen, nicht in der Szene nachbauen.
+Neue Datei in `szenen/`, Klasse von `Szene`, mit `name`, `titel`, `reihenfolge`. Der `name` muss eindeutig sein, sonst verdrängt die Szene stillschweigend eine andere. In `ablauf()` die Schrittliste zurückgeben, Beispiel `szenen/spaziergang.py`. Eigener Zustand gehört in `vorbereiten()`, eigenes Zeichnen in `zeichne_hinten`/`zeichne_vorn`, zusätzlicher Bereich in `grenzen_extra()`. Neue Zeichnungen (Requisiten) kommen nach `zeichnen/requisiten.py`. Fehlt ein Baustein, ihn allgemein in `szenen/basis.py` ergänzen, nicht in der Szene nachbauen.
 
 Weitere Figuren sind Darsteller: in `vorbereiten()` mit `self.dazu('wichtel', Wichtel, groesse=0.7)` anlegen, dann laufen alle Schritte auch mit ihnen, etwa `Mit('wichtel', Gehe(bis=...))` oder im Hintergrund `Nebenbei(Mit(...))`. Bei mehreren Figuren liefert `self.schreck_alle()` den Standardschreck für alle. Staub, Schnee und Krümel über `self.streue(...)`. Ideen und bereits umgesetzte Gags stehen in `szenen/IDEEN.md`.
 
