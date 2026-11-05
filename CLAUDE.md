@@ -8,6 +8,7 @@ Animierter Weihnachtsmann als durchsichtiges Overlay für Windows 11, gedacht f�
 - `szenen/`: eine Datei pro Szene, wird automatisch gefunden. `szenen/basis.py` enthält `Szene` und die Bausteine (Schritte).
 - `zeichnen/`: `grundlagen.py` (Farben, Pelz, Teilchen), `figur.py` (Weihnachtsmann, Posen, Kopf von vorn), `figuren.py` (weitere Figuren: Schneemann, Wichtel, Lebkuchenmann, Pinguin, Nussknacker, Tannenbaum, Eisbär, Rentier), `requisiten.py` (Rentier, Schlitten, Fahrrad, Schornstein, Seil, Geschenk, Lichterkette, Strumpf und anderes).
 - `pruefen.py`: rendert jede Szene ohne Fenster als Vorschaubild (`vorschau/<name>.png`) und testet den Schreck.
+- `abgreifen.py` (nur Windows) und `bildanalyse.py`: für Szenen mit `braucht = 'taskleiste'` oder `'schreibmarke'`. Bildschirmfoto, Taskleistensymbole und Schreibmarke werden ermittelt, die Szene bekommt Ausschnitt, Rechtecke (logische Pixel) und Flicken als `self.daten`. `pruefen.py` erzeugt dafür einen Testbildschirm. Szenen mit `nur_ausloeser = True` kommen nicht in der Zufallsreihe; die Tippkatze startet die Automatik, wenn nach dem Tippen 2–4 s Ruhe ist.
 
 `szenen/` und `zeichnen/` dürfen nichts Windows-Spezifisches importieren, damit `pruefen.py` überall läuft.
 
@@ -18,7 +19,7 @@ Neue Datei in `szenen/`, Klasse von `Szene`, mit `name`, `titel`, `reihenfolge`.
 Weitere Figuren sind Darsteller: in `vorbereiten()` mit `self.dazu('wichtel', Wichtel, groesse=0.7)` anlegen, dann laufen alle Schritte auch mit ihnen, etwa `Mit('wichtel', Gehe(bis=...))` oder im Hintergrund `Nebenbei(Mit(...))`. Bei mehreren Figuren liefert `self.schreck_alle()` den Standardschreck für alle. Staub, Schnee und Krümel über `self.streue(...)`. Ideen und bereits umgesetzte Gags stehen in `szenen/IDEEN.md`.
 
 Vorgaben von Thomas:
-- **Nur an den Bildschirmrändern** (oben, unten, links, rechts); die Mitte mit den Folien bleibt frei.
+- **Nur an den Bildschirmrändern** (oben, unten, links, rechts); die Mitte mit den Folien bleibt frei. Ausnahme: die Tippkatze sitzt im getippten Text.
 - **Schreckhaft:** `schreck_ablauf()` muss die Szene nach Maus/Taste schnell beenden (unter 3 s, besser ~1 s), mit sichtbarem großem Schreck. Standard: Erschrecke + Renne zum nächsten Rand.
 - **Kein Text**, keine Sprechblasen.
 - **Klein** (Standardgröße 15 % der Bildschirmhöhe) und liebevoll detailliert gezeichnet (Verläufe, Pelz, Blinzeln).
