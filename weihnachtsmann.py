@@ -9,8 +9,8 @@ erschrickt der Weihnachtsmann und verschwindet.
 
 Die Szenen liegen einzeln im Ordner szenen/, das Zeichnen in zeichnen/.
 
-Einige Szenen spielen mit dem, was gerade zu sehen ist (Taskleiste,
-getippter Text). Dafür holt abgreifen.py ein Bildschirmfoto und die Lage der
+Einige Szenen spielen mit dem, was gerade zu sehen ist (getippter
+Text). Dafür holt abgreifen.py ein Bildschirmfoto und die Lage der
 Symbole bzw. der Schreibmarke; ohne passende Stelle fällt die Szene aus. Die
 Tippkatze kommt in der Automatik, wenn nach dem Tippen kurz Ruhe ist.
 

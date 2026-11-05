@@ -64,11 +64,10 @@ Wunsch nach Figuren aus einem bekannten Eiskönigin-Film und nach einem bekannte
 
 ## Vierte Runde: Spiel mit dem echten Bildschirm
 
-Diese Szenen tun nur so, als veränderten sie andere Programme. `abgreifen.py` holt ein Bildschirmfoto und die Lage der Symbole bzw. der Schreibmarke, `bildanalyse.py` schneidet Symbol oder Zeile aus und baut einen Flicken zum Abdecken. Die Szene deckt das Original ab und spielt mit der Kopie. Findet sich nichts Passendes, fällt die Szene aus.
+Diese Szenen tun nur so, als veränderten sie andere Programme. `abgreifen.py` holt ein Bildschirmfoto und die Lage der Schreibmarke, `bildanalyse.py` schneidet die Zeile aus und baut einen Flicken zum Abdecken. Die Szene deckt das Original ab und spielt mit der Kopie. Findet sich nichts Passendes, fällt die Szene aus.
 
 | Name | Ort | Gag |
 |---|---|---|
-| taskleiste | Taskleiste | ein Programmsymbol zappelt, wächst ruckweise, glüht, platzt in Scherben, Funken und Rauch und taucht mit Nachzittern wieder auf |
 | tippkatze | getippte Zeile | nach einer Tipppause öffnet sich ein Spalt zwischen zwei Wörtern, eine Katze schaut heraus, trampelt auf der Zeile, Buchstaben hüpfen und tauschen die Plätze; nur über den eigenen Auslöser in der Automatik, liegt ausnahmsweise mitten im Bild |
 
-Verworfen: tanzende Desktopsymbole (Thomas, November 2026).
+Verworfen (Thomas, November 2026): tanzende Desktopsymbole, platzendes Taskleistensymbol.

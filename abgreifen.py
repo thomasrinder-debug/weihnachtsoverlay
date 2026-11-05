@@ -1,16 +1,16 @@
-"""Was auf dem Bildschirm zu sehen ist: Taskleistensymbole und die Schreibmarke
-mit der Zeile davor. Nur unter Windows.
+"""Was auf dem Bildschirm zu sehen ist: die Schreibmarke mit der Zeile davor.
+Nur unter Windows.
 
 Das Overlay ändert nichts an anderen Programmen. Es macht ein Bildschirmfoto,
-schneidet die Stellen aus und gibt sie den Szenen als Daten: Bildausschnitte,
+schneidet die Zeile aus und gibt sie den Szenen als Daten: Bildausschnitte,
 Rechtecke in logischen Pixeln (wie die Szene zeichnet) und Flicken, mit denen
-die Szene das Original abdeckt, solange die Kopie herumturnt. Die Auswertung
+die Szene das Original abdeckt, solange die Kopie durcheinandergerät. Die Auswertung
 der Bilder steht in bildanalyse.py.
 """
 import ctypes
 from ctypes import wintypes
 
-from bildanalyse import Umrechnung, taskleiste_daten, tippzeile_daten
+from bildanalyse import Umrechnung, tippzeile_daten
 
 # ---------------------------------------------------------------- Windows-Abfragen
 
@@ -37,17 +37,10 @@ def _user32():
     u = ctypes.windll.user32
     u.GetWindowRect.argtypes = [wintypes.HWND, ctypes.POINTER(wintypes.RECT)]
     u.ClientToScreen.argtypes = [wintypes.HWND, ctypes.POINTER(wintypes.POINT)]
-    u.GetClientRect.argtypes = [wintypes.HWND, ctypes.POINTER(wintypes.RECT)]
-    u.WindowFromPoint.argtypes = [wintypes.POINT]
-    u.WindowFromPoint.restype = wintypes.HWND
-    u.FindWindowExW.argtypes = [wintypes.HWND, wintypes.HWND, wintypes.LPCWSTR, wintypes.LPCWSTR]
-    u.FindWindowExW.restype = wintypes.HWND
     u.FindWindowW.restype = wintypes.HWND
     u.GetForegroundWindow.restype = wintypes.HWND
     u.GetAncestor.argtypes = [wintypes.HWND, ctypes.c_uint]
     u.GetAncestor.restype = wintypes.HWND
-    u.SendMessageW.argtypes = [wintypes.HWND, ctypes.c_uint, wintypes.WPARAM, wintypes.LPARAM]
-    u.SendMessageW.restype = ctypes.c_ssize_t
     return u
 
 
@@ -55,10 +48,6 @@ def fensterrechteck(hwnd):
     r = wintypes.RECT()
     _user32().GetWindowRect(hwnd, ctypes.byref(r))
     return r.left, r.top, r.right, r.bottom
-
-
-def kind(eltern, klasse):
-    return _user32().FindWindowExW(eltern, None, klasse, None)
 
 
 def physisch(screen):
@@ -70,38 +59,6 @@ def bildschirmfoto(screen):
     """(Bild in physischen Pixeln, Umrechnung) für einen Bildschirm."""
     bild = screen.grabWindow(0).toImage()
     return bild, Umrechnung(screen.geometry(), screen.devicePixelRatio())
-
-
-def taskleiste(screen):
-    """Daten für die Taskleistenszene oder None (Taskleiste nicht auf diesem Bildschirm, keine Symbole)."""
-    leiste_hwnd = _user32().FindWindowW('Shell_TrayWnd', None)
-    if not leiste_hwnd:
-        return None
-    leiste = fensterrechteck(leiste_hwnd)
-    sx0, sy0, sx1, sy1 = physisch(screen)
-    if not (sx0 <= leiste[0] and leiste[2] <= sx1 and sy0 <= leiste[1] and leiste[3] <= sy1):
-        return None
-    if leiste[2] - leiste[0] < leiste[3] - leiste[1]:
-        return None                     # senkrechte Taskleiste: nicht vorgesehen
-    # Im Vollbild (PowerPoint, F11) liegt etwas über der Taskleiste
-    u = _user32()
-    mitte = wintypes.POINT((leiste[0] + leiste[2]) // 2, (leiste[1] + leiste[3]) // 2)
-    if u.GetAncestor(u.WindowFromPoint(mitte), 2) != leiste_hwnd:
-        return None
-    links = leiste[0]
-    start = kind(leiste_hwnd, 'Start')
-    if start:
-        links = max(links, fensterrechteck(start)[2])
-    rechts = leiste[2]
-    info = kind(leiste_hwnd, 'TrayNotifyWnd')
-    if info:
-        rechts = min(rechts, fensterrechteck(info)[0])
-    bild, um = bildschirmfoto(screen)
-    l0, t0 = um.im_bild(leiste[0], leiste[1])
-    l1, t1 = um.im_bild(leiste[2], leiste[3])
-    b0, _ = um.im_bild(links, 0)
-    b1, _ = um.im_bild(rechts, 0)
-    return taskleiste_daten(bild, (l0, t0, l1, t1), (b0, t0, b1, t1), um)
 
 
 def _caret_msaa(hwnd):
@@ -169,6 +126,6 @@ def tippzeile(screen):
 def fuer(art, screen):
     """Daten für eine Szene, die etwas vom Bildschirm braucht (Szene.braucht)."""
     try:
-        return {'taskleiste': taskleiste, 'schreibmarke': tippzeile}[art](screen)
+        return {'schreibmarke': tippzeile}[art](screen)
     except (OSError, ValueError, KeyError):
         return None

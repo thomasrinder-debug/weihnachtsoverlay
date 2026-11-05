@@ -8,7 +8,7 @@ Animierter Weihnachtsmann als durchsichtiges Overlay für Windows 11, gedacht f�
 - `szenen/`: eine Datei pro Szene, wird automatisch gefunden. `szenen/basis.py` enthält `Szene` und die Bausteine (Schritte).
 - `zeichnen/`: `grundlagen.py` (Farben, Pelz, Teilchen), `figur.py` (Weihnachtsmann, Posen, Kopf von vorn), `figuren.py` (weitere Figuren: Schneemann, Wichtel, Lebkuchenmann, Pinguin, Nussknacker, Tannenbaum, Eisbär, Rentier), `requisiten.py` (Rentier, Schlitten, Fahrrad, Schornstein, Seil, Geschenk, Lichterkette, Strumpf und anderes).
 - `pruefen.py`: rendert jede Szene ohne Fenster als Vorschaubild (`vorschau/<name>.png`) und testet den Schreck.
-- `abgreifen.py` (nur Windows) und `bildanalyse.py`: für Szenen mit `braucht = 'taskleiste'` oder `'schreibmarke'`. Bildschirmfoto, Taskleistensymbole und Schreibmarke werden ermittelt, die Szene bekommt Ausschnitt, Rechtecke (logische Pixel) und Flicken als `self.daten`. `pruefen.py` erzeugt dafür einen Testbildschirm. Szenen mit `nur_ausloeser = True` kommen nicht in der Zufallsreihe; die Tippkatze startet die Automatik, wenn nach dem Tippen 2–4 s Ruhe ist.
+- `abgreifen.py` (nur Windows) und `bildanalyse.py`: für Szenen mit `braucht = 'schreibmarke'`. Bildschirmfoto und Schreibmarke werden ermittelt, die Szene bekommt Ausschnitt, Rechtecke (logische Pixel) und Flicken als `self.daten`. `pruefen.py` erzeugt dafür einen Testbildschirm. Szenen mit `nur_ausloeser = True` kommen nicht in der Zufallsreihe; die Tippkatze startet die Automatik, wenn nach dem Tippen 2–4 s Ruhe ist.
 
 `szenen/` und `zeichnen/` dürfen nichts Windows-Spezifisches importieren, damit `pruefen.py` überall läuft.
 

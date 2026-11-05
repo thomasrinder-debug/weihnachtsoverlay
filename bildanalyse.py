@@ -1,13 +1,12 @@
 """Bildauswertung für die Szenen, die mit dem echten Bildschirm spielen: Tintenspalten,
-Symbole in der Taskleiste, Buchstabenstücke einer Zeile, Flicken zum Abdecken.
+Buchstabenstücke einer Zeile, Flicken zum Abdecken.
 
 Ohne Windows-Abhängigkeit, damit pruefen.py sie mit Testbildern prüfen kann. Was
 Fenster und Schreibmarke abfragt, steht in abgreifen.py.
 """
-import random
-
 from PyQt6.QtCore import QPointF, QRect, QRectF
 from PyQt6.QtGui import QColor, QImage
+
 
 class Pixel:
     """Schneller Lesezugriff auf ein QImage (32 Bit)."""
@@ -79,34 +78,6 @@ def tintenzeilen(px, x0, x1, y0, y1, grund, schwelle=60):
     return (zeilen[0], zeilen[-1] + 1) if zeilen else None
 
 
-def flicken(px, x0, y0, x1, y1):
-    """Bild für das Rechteck, das Zeile für Zeile zwischen der Spalte links und
-    rechts davon überblendet: deckt ein Symbol auf ruhigem Grund unauffällig ab."""
-    w, h = x1 - x0, y1 - y0
-    bild = QImage(w, h, QImage.Format.Format_RGB32)
-    links, rechts = max(0, x0 - 2), min(px.w - 1, x1 + 1)
-    for y in range(h):
-        a, b = px.rgb(links, y0 + y), px.rgb(rechts, y0 + y)
-        for x in range(w):
-            f = (x + 0.5) / w
-            bild.setPixel(x, y, QColor(int(a[0] + (b[0] - a[0]) * f), int(a[1] + (b[1] - a[1]) * f),
-                                       int(a[2] + (b[2] - a[2]) * f)).rgb())
-    return bild
-
-
-def freistellen(bild, grund, weich=(25, 70)):
-    """Pixel nahe der Grundfarbe durchsichtig machen, damit die Kopie ohne Kästchen herumfliegt."""
-    px = Pixel(bild)
-    aus = QImage(px.w, px.h, QImage.Format.Format_ARGB32)
-    a0, a1 = weich
-    for y in range(px.h):
-        for x in range(px.w):
-            c = px.rgb(x, y)
-            alpha = int(255 * min(1.0, max(0.0, (abstand(c, grund) - a0) / (a1 - a0))))
-            aus.setPixel(x, y, QColor(c[0], c[1], c[2], alpha).rgba())
-    return aus
-
-
 def einfarbig(w, h, farbe):
     bild = QImage(w, h, QImage.Format.Format_RGB32)
     bild.fill(QColor(*farbe))
@@ -138,44 +109,6 @@ class Umrechnung:
 
 def ausschnitt(bild, x0, y0, x1, y1):
     return bild.copy(QRect(x0, y0, x1 - x0, y1 - y0))
-
-
-# ---- Taskleiste
-
-def symbole_in_leiste(px, x0, y0, x1, y1):
-    """Symbole in einem waagerechten Streifen der Taskleiste: [(x0, y0, x1, y1)] in Bildpixeln.
-    Breite Dinge (Suchfeld, Uhrzeit) fallen heraus, ebenso die Laufleiste unter offenen Programmen."""
-    h = y1 - y0
-    grund = haeufigste_farbe(px, (x0, y0, x1, y1))
-    mitte0, mitte1 = y0 + round(h * 0.2), y0 + round(h * 0.8)
-    spalten = tintenspalten(px, (x0, mitte0, x1, mitte1), grund, 70)
-    gefunden = []
-    for a, b in laeufe(spalten, luecke=2, mindest=2):
-        zeilen = tintenzeilen(px, x0 + a, x0 + b, mitte0, mitte1, grund, 70)
-        if not zeilen:
-            continue
-        w, hh = b - a, zeilen[1] - zeilen[0]
-        if 0.3 * h <= w <= 0.8 * h and 0.3 * h <= hh <= 0.8 * h:
-            gefunden.append((x0 + a, zeilen[0], x0 + b, zeilen[1]))
-    return gefunden, grund
-
-
-def taskleiste_daten(bild, leiste, bereich, um, wahl=None):
-    """leiste/bereich: physische Rechtecke (x0, y0, x1, y1) im Bildschirmfoto, bereich = wo
-    Programmsymbole liegen. Gibt die Daten für die Taskleistenszene oder None."""
-    px = Pixel(bild)
-    symbole, grund = symbole_in_leiste(px, bereich[0], leiste[1], bereich[2], leiste[3])
-    if not symbole:
-        return None
-    x0, y0, x1, y1 = symbole[wahl if wahl is not None else random.randrange(len(symbole))]
-    rand = max(2, (y1 - y0) // 6)
-    x0, y0, x1, y1 = x0 - rand, y0 - rand, x1 + rand, y1 + rand
-    return {
-        'symbol': freistellen(ausschnitt(bild, x0, y0, x1, y1), grund),
-        'flicken': flicken(px, x0, y0, x1, y1),
-        'rechteck': um.bildrechteck(x0, y0, x1, y1),
-        'leiste': um.bildrechteck(*leiste),
-    }
 
 
 # ---- Zeile an der Schreibmarke

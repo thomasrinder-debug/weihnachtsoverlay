@@ -40,7 +40,7 @@ class Szene:
     name = ''           # Kurzname, z. B. für --sofort
     titel = ''          # Anzeige im Menü
     reihenfolge = 99    # Platz im Menü und bei Strg+Alt+1..9
-    braucht = None      # 'taskleiste', 'schreibmarke': Szene spielt mit dem echten Bildschirm
+    braucht = None      # 'schreibmarke': Szene spielt mit dem echten Bildschirm
     nur_ausloeser = False   # kommt nicht in der zufälligen Reihe, nur über einen eigenen Auslöser
 
     def __init__(self, geo, s, daten=None):
