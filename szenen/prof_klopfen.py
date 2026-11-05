@@ -1,7 +1,6 @@
 """Sicherheitsklopfer, dazu die gemeinsame Grundlage der Computer-Szenen
 (Rollwagen mit Röhrenmonitor, herumfliegende Trümmer, Schlagen, Wagen wegschieben)."""
 import math
-import random
 
 from PyQt6.QtCore import QRectF
 from PyQt6.QtGui import QColor
@@ -11,8 +10,8 @@ from zeichnen.grundlagen import blinzeln, glatt
 from zeichnen.labor import BEIGE, BEIGE_DUNKEL
 from zeichnen.labor_d import MON, WAGEN_B, WAGEN_OBEN, zeichne_gehaeuse, zeichne_roehre, zeichne_rollwagen
 
-from .basis import Erschrecke, Gehe, Gleite, Schaue, Schritt, Setze, Stehe, Tu, Wandel, wert
-from .professor import FUNKEN, RAUCH, HaareHoch, ProfSzene, denk_pose, schieben, triumph_pose
+from .basis import Erschrecke, Gehe, Gleite, Schaue, Schritt, Setze, Stehe, Tu, Wandel
+from .professor import FUNKEN, HaareHoch, ProfSzene, denk_pose, schieben, triumph_pose
 
 STAUB = [QColor(225, 215, 195, 200), QColor(200, 190, 170, 180), QColor(240, 235, 225, 190)]
 

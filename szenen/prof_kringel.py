@@ -12,7 +12,7 @@ from zeichnen.professor import SCHULTER_Y
 
 from .basis import Erschrecke, Gehe, Schaue, Schritt, Setze, Springe, Stehe, Tu
 from .professor import FUNKEN, RAUCH, HaareHoch, denk_pose
-from .prof_klopfen import STAUB, ComputerSzene, Hau
+from .prof_klopfen import ComputerSzene, Hau
 
 RAD = 140            # Radius des großen Kringels in Einheiten
 HAMMER = 1.6 * 44    # Hammerlänge in Einheiten (Griff bis Kopf)
