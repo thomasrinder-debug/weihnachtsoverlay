@@ -1,4 +1,4 @@
-"""Rentier, Schlitten, Fahrrad, Schornstein und Seil."""
+"""Rentier, Schlitten, Fahrrad, Schornstein, Seil, Geschenke, Lichterkette und anderer Kleinkram."""
 import math
 
 from PyQt6.QtCore import QPointF, QRectF, Qt
@@ -315,3 +315,205 @@ def zeichne_seil(p, seil_x, oben, ende, s):
     for dx in (-4, -1.5, 1.5, 4):
         p.drawLine(QPointF(ex + dx * s, ende + 5 * s), QPointF(ex + dx * 1.6 * s, ende + 15 * s))
     p.setPen(KEIN_STIFT)
+
+
+def zeichne_geschenk(p, b, h, farbe, band=GOLD, deckel=(0.0, 0.0, 0.0), muster=True):
+    """Geschenk mit Schleife, Boden mittig im Ursprung. deckel = (dx, dy, drehung)."""
+    p.setBrush(QColor(0, 0, 0, 45))
+    p.drawEllipse(QRectF(-b * 0.55, -3, b * 1.1, 6))
+    p.setBrush(linear(-b / 2, 0, b / 2, 0, farbe.lighter(125), farbe.darker(135)))
+    p.drawRect(QRectF(-b / 2, -h, b, h))
+    if muster:
+        p.setBrush(QColor(255, 255, 255, 70))
+        for i in range(int(b // 14)):
+            for k in range(int(h // 14)):
+                if (i + k) % 2 == 0:
+                    kreis(p, -b / 2 + 7 + i * 14, -h + 10 + k * 14, 2.2)
+    p.setBrush(QColor(0, 0, 0, 50))
+    p.drawRect(QRectF(-b / 2, -h, b, 5))
+    p.setBrush(linear(0, -h, 0, 0, band.lighter(120), band.darker(110)))
+    p.drawRect(QRectF(-b * 0.08, -h, b * 0.16, h))
+    dx, dy, dreh = deckel
+    p.save()
+    p.translate(dx, -h + dy)
+    p.rotate(dreh)
+    p.setBrush(linear(0, -14, 0, 0, farbe.lighter(140), farbe.darker(110)))
+    p.drawRoundedRect(QRectF(-b / 2 - 5, -14, b + 10, 15), 3, 3)
+    p.setBrush(linear(0, -14, 0, 0, band.lighter(130), band))
+    p.drawRect(QRectF(-b * 0.08, -14, b * 0.16, 15))
+    for seite in (-1, 1):
+        schlaufe = QPainterPath()
+        schlaufe.moveTo(0, -14)
+        schlaufe.cubicTo(seite * 10, -40, seite * 30, -36, seite * 24, -22)
+        schlaufe.cubicTo(seite * 20, -14, seite * 8, -14, 0, -14)
+        p.setBrush(linear(0, -40, 0, -14, band.lighter(140), band.darker(115)))
+        p.drawPath(schlaufe)
+        ende = QPainterPath()
+        ende.moveTo(0, -14)
+        ende.quadTo(seite * 12, -8, seite * 16, 2)
+        ende.lineTo(seite * 10, 0)
+        ende.quadTo(seite * 6, -8, 0, -14)
+        p.drawPath(ende)
+    p.setBrush(radial(-1, -17, 6, band.lighter(150), band))
+    kreis(p, 0, -15, 5)
+    p.restore()
+
+
+def zeichne_feder(p, x, unten, oben, breite=16, windungen=6):
+    """Spiralfeder von unten nach oben."""
+    pfad = QPainterPath()
+    pfad.moveTo(x, unten)
+    n = windungen * 2
+    for i in range(1, n + 1):
+        y = unten + (oben - unten) * i / n
+        pfad.lineTo(x + (breite / 2 if i % 2 else -breite / 2), y)
+    pfad.lineTo(x, oben)
+    p.setBrush(KEIN_PINSEL)
+    p.setPen(stift(QColor('#6C7280'), 3.4))
+    p.drawPath(pfad)
+    p.setPen(stift(QColor('#D5DAE2'), 1.4))
+    p.drawPath(pfad)
+    p.setPen(KEIN_STIFT)
+
+
+LICHTER = (QColor('#FF4D4D'), QColor('#FFD23F'), QColor('#3FA7FF'), QColor('#5BE06A'), QColor('#FF7AE0'))
+
+
+def zeichne_lichterkette(p, pfad, s, an, t, abstand=34):
+    """Kabel entlang pfad (QPainterPath in Pixeln) mit Birnchen alle 'abstand' Einheiten.
+    an: 0..1 Helligkeit, die Birnchen blinken versetzt."""
+    p.setBrush(KEIN_PINSEL)
+    p.setPen(stift(QColor('#1E4A2A'), 2.6 * s))
+    p.drawPath(pfad)
+    p.setPen(KEIN_STIFT)
+    laenge = pfad.length()
+    n = int(laenge / (abstand * s))
+    for i in range(1, n + 1):
+        anteil = pfad.percentAtLength(i * abstand * s - abstand * s * 0.5)
+        pt = pfad.pointAtPercent(anteil)
+        w = -pfad.angleAtPercent(anteil)
+        farbe = LICHTER[i % len(LICHTER)]
+        hell = an * (0.65 + 0.35 * math.sin(t * 5 + i * 2.1))
+        if hell > 0.05:
+            schein = QColor(farbe)
+            schein.setAlpha(int(150 * hell))
+            aus = QColor(farbe)
+            aus.setAlpha(0)
+            p.setBrush(radial(pt.x(), pt.y(), 13 * s, schein, aus))
+            kreis(p, pt.x(), pt.y(), 13 * s)
+        p.save()
+        p.translate(pt)
+        p.rotate(w)
+        p.setBrush(QColor('#2E6B3A'))
+        p.drawRect(QRectF(-2.6 * s, 0, 5.2 * s, 4 * s))
+        innen = farbe.lighter(100 + int(70 * hell)) if hell > 0.05 else farbe.darker(170)
+        p.setBrush(radial(-1 * s, 7 * s, 6 * s, innen, farbe.darker(120 if hell > 0.05 else 220)))
+        p.drawEllipse(QRectF(-4 * s, 3 * s, 8 * s, 11 * s))
+        p.restore()
+
+
+def zeichne_steckdose(p, x, y, s, stecker=False):
+    """Bodensteckdose, Unterkante bei y."""
+    p.save()
+    p.translate(x, y)
+    p.scale(s, s)
+    p.setBrush(linear(0, -26, 0, 0, QColor('#F4F4F2'), QColor('#BFC3C9')))
+    p.drawRoundedRect(QRectF(-18, -26, 36, 26), 5, 5)
+    p.setBrush(QColor('#D9DCE0'))
+    kreis(p, 0, -13, 9)
+    p.setBrush(QColor('#555A62'))
+    kreis(p, -3.5, -13, 1.7)
+    kreis(p, 3.5, -13, 1.7)
+    if stecker:
+        p.setBrush(linear(-8, 0, 8, 0, QColor('#3E8E52'), QColor('#1E4A2A')))
+        p.drawRoundedRect(QRectF(-7, -30, 14, 18), 4, 4)
+    p.restore()
+
+
+def zeichne_stecker(p, x, y, winkel, s):
+    p.save()
+    p.translate(x, y)
+    p.rotate(winkel)
+    p.scale(s, s)
+    p.setBrush(linear(-7, 0, 7, 0, QColor('#3E8E52'), QColor('#1E4A2A')))
+    p.drawRoundedRect(QRectF(-7, -9, 14, 18), 4, 4)
+    p.setBrush(QColor('#C9CDD4'))
+    p.drawRect(QRectF(-4.5, 9, 2, 6))
+    p.drawRect(QRectF(2.5, 9, 2, 6))
+    p.restore()
+
+
+def zeichne_eisflaeche(p, x0, x1, y, s):
+    """Spiegelglatte Eisfläche am Boden von x0 bis x1."""
+    b = x1 - x0
+    p.setBrush(linear(x0, y - 10 * s, x0, y, QColor(225, 245, 255, 230), QColor(150, 205, 240, 230)))
+    p.drawRoundedRect(QRectF(x0, y - 9 * s, b, 12 * s), 6 * s, 6 * s)
+    p.setPen(stift(QColor(255, 255, 255, 210), 1.6 * s))
+    for k in (0.15, 0.45, 0.7):
+        p.drawLine(QPointF(x0 + b * k, y - 6 * s), QPointF(x0 + b * k + 18 * s, y - 6 * s))
+    p.setPen(KEIN_STIFT)
+    p.setBrush(QColor(255, 255, 255, 230))
+    stern(p, x0 + b * 0.3, y - 7 * s, 5 * s)
+    stern(p, x0 + b * 0.8, y - 5 * s, 3.5 * s)
+
+
+def zeichne_muetze_lose(p):
+    """Die Mütze des Weihnachtsmanns ohne Kopf, Krempe mittig im Ursprung."""
+    muetze = QPainterPath()
+    muetze.moveTo(-30, 0)
+    muetze.cubicTo(-28, -42, 22, -56, 44, -26)
+    muetze.cubicTo(34, -30, 28, -20, 30, 0)
+    muetze.closeSubpath()
+    p.setBrush(linear(-30, -50, 30, 0, ROT_HELL, ROT_DUNKEL))
+    p.drawPath(muetze)
+    flausch(p, [(x, 0) for x in range(-30, 31, 6)], 7.5)
+    flausch(p, [(46 + dx, -24 + dy) for dx, dy in ((0, 0), (-4, -3), (4, -3), (-3, 4), (4, 3))], 6)
+
+
+def zeichne_schneeball(p, x, y, r):
+    p.setBrush(radial(x - r * 0.35, y - r * 0.4, r * 1.6, WEISS, QColor('#B8CBE2')))
+    kreis(p, x, y, r)
+    p.setBrush(QColor(255, 255, 255, 220))
+    kreis(p, x - r * 0.35, y - r * 0.35, r * 0.25)
+
+
+def zeichne_walnuss(p, x, y, r):
+    p.setBrush(radial(x - r * 0.3, y - r * 0.3, r * 1.5, QColor('#C9965A'), QColor('#7A5228')))
+    p.drawEllipse(QPointF(x, y), r, r * 0.9)
+    p.setPen(stift(QColor('#6A4420'), r * 0.12))
+    p.setBrush(KEIN_PINSEL)
+    p.drawLine(QPointF(x, y - r * 0.9), QPointF(x, y + r * 0.9))
+    p.drawArc(QRectF(x - r * 0.7, y - r * 0.5, r * 0.6, r), 60 * 16, 240 * 16)
+    p.drawArc(QRectF(x + r * 0.1, y - r * 0.5, r * 0.6, r), -120 * 16, 240 * 16)
+    p.setPen(KEIN_STIFT)
+
+
+def zeichne_strumpf(p, voll=0.0):
+    """Weihnachtsstrumpf an seiner Schlaufe im Ursprung, hängt nach unten, Spitze nach rechts.
+    voll (0..1) beult ihn aus."""
+    p.setPen(stift(QColor('#7A5428'), 2.4))
+    p.setBrush(KEIN_PINSEL)
+    p.drawEllipse(QRectF(-5, -2, 10, 12))
+    p.setPen(KEIN_STIFT)
+    b = 6 * voll
+    bein = QPainterPath()
+    bein.moveTo(-24 - b, 22)
+    bein.lineTo(24 + b, 22)
+    bein.cubicTo(26 + b, 70, 24 + b, 92, 34, 108)
+    bein.cubicTo(44, 118, 70, 116, 76, 128)
+    bein.cubicTo(82, 142, 66, 156, 40, 152)
+    bein.cubicTo(8, 150, -14, 140, -22, 118)
+    bein.cubicTo(-28 - b, 96, -26 - b, 60, -24 - b, 22)
+    p.setBrush(radial(-6, 60, 110, ROT_HELL, ROT_DUNKEL))
+    p.drawPath(bein)
+    p.save()
+    p.setClipPath(bein)
+    p.setBrush(GRUEN)
+    p.drawEllipse(QPointF(70, 140), 24, 22)
+    p.drawEllipse(QPointF(-18, 132), 18, 22)
+    p.setBrush(QColor(255, 255, 255, 200))
+    for k in range(5):
+        stern(p, -10 + k * 9, 58 + (k % 2) * 16, 4)
+    p.restore()
+    flausch(p, [(x, 22 + (5 if (x // 8) % 2 else 0)) for x in range(-24, 27, 8)], 8)
+    flausch(p, [(x, 30) for x in range(-24, 27, 8)], 8)
