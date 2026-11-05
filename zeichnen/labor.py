@@ -85,7 +85,7 @@ def _strichlaenge(punkte):
 
 def kreide_striche(text, x, y, hoehe, wackel=7):
     """Striche (Punktlisten in Einheiten) für einen Kreideanschrieb, links oben bei (x, y)."""
-    zufall = random.Random(hash(text) % 1000 + wackel)
+    zufall = random.Random(sum(ord(c) * (i + 1) for i, c in enumerate(text)) + wackel)
     striche = []
     for ch in text:
         hoch = ch == '²'
