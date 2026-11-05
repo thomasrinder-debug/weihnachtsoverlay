@@ -38,7 +38,7 @@ class PinguinSzene(Szene):
                            haltung=lambda p, d: Pose(bein_v=p.bein_v * 1.4, bein_h=p.bein_h * 1.4, arm_v=-30,
                                                      arm_h=-30, auge_zu=True, hub=p.hub))),
             # ausgerutscht!
-            Mit('pg', Wandel(0.22, neigung=-85, hopp=lambda d: 36 * d.s)),
+            Mit('pg', Wandel(0.22, neigung=-80, hopp=lambda d: 48 * d.s)),
             Mit('pg', Setze(pose=Pose(arm_v=-150, arm_h=-150, bein_v=-40, bein_h=-20, schreck=1.0))),
             Setze(sterne=True),
             Mit('pg', Stehe(1.6, lambda d, u: Pose(arm_v=-150 + 20 * math.sin(u * 8), arm_h=-140, bein_v=-40,

@@ -594,7 +594,7 @@ class Nussknacker:
         # Klappkiefer, im Gelenk hinten drehbar
         p.save()
         p.translate(-16, hy + 8)
-        p.rotate(kiefer * 28)
+        p.rotate(kiefer * 40)
         p.setBrush(QColor('#5A1414'))
         p.drawRect(QRectF(4, -6, 34, 10))
         p.setBrush(radial(18, 6, 30, HOLZ_HAUT, HAUT_DUNKEL))
