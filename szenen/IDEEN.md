@@ -45,3 +45,19 @@ Die Vorschläge stammen aus einem Dialog mit ChatGPT; weggelassen wurden die, di
 | turm | unten | Geschenketurm auf dem Kopf, Balancieren, Kippen |
 | plaetzchen | unten + Seite | Hand stibitzt Plätzchen, Wichtel haut mit dem Kochlöffel drauf |
 | trapez | oben | Trapez aus Zuckerstangen, kopfüber winken, Abflug über den Rand |
+
+## Dritte Runde: Pinguine, Katzen, Winterfiguren
+
+Wunsch nach Figuren aus einem bekannten Eiskönigin-Film und nach einem bekannten grünen Weihnachtsmuffel: beides geschützt, deshalb eigene Figuren (Frostfee, Wichtelschwestern, Grummelkater).
+
+| Name | Rand | Gag |
+|---|---|---|
+| pinguinfamilie | unten | Mama und drei Küken rutschen im Gänsemarsch, das Kleinste purzelt |
+| angeln | unten | Pinguin angelt eine Socke, dann springt ihm ein Fisch auf den Kopf |
+| katzekugel | oben | Katze läuft kopfüber an der Kante und spielt mit einer Christbaumkugel |
+| katzekarton | unten | Katze im Geschenk, Deckel drauf, Katze landet auf seiner Mütze |
+| grummelkater | unten | mürrischer Kater schubst Kugeln vom Bäumchen und schiebt es weg |
+| frostfee | unten | Frostfee tippt ihn an, er steckt im Eisblock |
+| schlittschuh | unten | elegante und wackelige Wichtelschwester, Zusammenstoß |
+| eispalast | unten | Eisblock-Schloss, ein Block zu viel (Mützen-Gag) |
+
