@@ -30,3 +30,7 @@ Optionen: `--monitor 2` (Beamer), `--groesse 0.2`, `--pause 10 60`, `--manuell`,
 ## Szenen prüfen
 
 `python pruefen.py` rendert alle Szenen als Vorschaubilder nach `vorschau/` und testet den Schreck. Wie neue Szenen entstehen, steht in `CLAUDE.md`.
+
+## Lizenz
+
+Copyright © 2026 Thomas Rinder. Freie Software unter der GNU General Public License v3.0, siehe `LICENSE`. Du darfst sie nutzen, verändern und weitergeben, auch veränderte Fassungen weitergeben, solange diese ebenfalls unter der GPL-3.0 stehen und ihr Quelltext offen ist. Das Setup enthält PyQt6 (GPL-3.0) und Qt (LGPL-3.0).
