@@ -787,3 +787,119 @@ def zeichne_zuckerstange(p, laenge, haken=True, breite=9):
     p.setPen(streifen)
     p.drawPath(pfad)
     p.setPen(KEIN_STIFT)
+
+
+# ---------------------------------------------------------------- Ostern
+
+EI_FARBEN = (QColor('#F2C14E'), QColor('#7FC8A9'), QColor('#E88AA8'), QColor('#8FB3E8'), QColor('#B79BE0'),
+             QColor('#F49B5C'))
+
+
+def zeichne_osterei(p, x, y, r, farbe, muster=0, dreh=0.0, bemalt=1.0, farben=EI_FARBEN):
+    """Ei mit Mittelpunkt (x, y) und halber Breite r. muster 0: Streifen, 1: Punkte, 2: Zickzack.
+    bemalt (0..4): wie weit es schon bemalt ist (weiß, drei Bänder, Tupfen); farbe None: weiß."""
+    p.save()
+    p.setPen(KEIN_STIFT)
+    p.translate(x, y)
+    p.rotate(dreh)
+    ei = QPainterPath()
+    ei.moveTo(0, -1.3 * r)
+    ei.cubicTo(0.75 * r, -1.3 * r, r, -0.2 * r, r, 0.25 * r)
+    ei.cubicTo(r, 0.8 * r, 0.55 * r, r, 0, r)
+    ei.cubicTo(-0.55 * r, r, -r, 0.8 * r, -r, 0.25 * r)
+    ei.cubicTo(-r, -0.2 * r, -0.75 * r, -1.3 * r, 0, -1.3 * r)
+    grund = farbe if farbe is not None else QColor('#FBF6EC')
+    p.setBrush(radial(-0.35 * r, -0.45 * r, 2.2 * r, grund.lighter(125), grund.darker(118)))
+    p.drawPath(ei)
+    p.setClipPath(ei, Qt.ClipOperation.IntersectClip)
+    if farbe is None:
+        for k in range(3):
+            if bemalt <= k:
+                break
+            anteil = min(1.0, bemalt - k)
+            c = farben[(k * 2) % len(farben)]
+            yb = -0.6 * r + k * 0.55 * r
+            p.setBrush(c)
+            p.drawRect(QRectF(-r, yb, 2 * r * anteil, 0.24 * r))
+        if bemalt > 3:
+            p.setBrush(WEISS)
+            for k in range(int(min(1.0, bemalt - 3) * 7)):
+                kreis(p, -0.7 * r + (k % 4) * 0.47 * r, -0.33 * r + 0.55 * r * (k // 4), 0.09 * r)
+    elif muster == 0:
+        p.setBrush(WEISS)
+        p.drawRect(QRectF(-r, -0.25 * r, 2 * r, 0.16 * r))
+        p.setBrush(farbe.darker(140))
+        p.drawRect(QRectF(-r, 0.12 * r, 2 * r, 0.14 * r))
+    elif muster == 1:
+        p.setBrush(WEISS)
+        for dx, dy in ((-0.45, -0.5), (0.35, -0.2), (-0.2, 0.25), (0.55, 0.45), (-0.65, 0.4), (0.05, -0.85)):
+            kreis(p, dx * r, dy * r, 0.14 * r)
+    else:
+        zick = QPainterPath()
+        zick.moveTo(-r, 0)
+        for k in range(7):
+            zick.lineTo(-r + (k + 0.5) * r / 3.5, -0.22 * r if k % 2 == 0 else 0.0)
+        p.setPen(stift(WEISS, 0.14 * r))
+        p.setBrush(KEIN_PINSEL)
+        p.drawPath(zick)
+        p.setPen(KEIN_STIFT)
+    p.setClipping(False)
+    p.setBrush(QColor(255, 255, 255, 150))
+    p.drawEllipse(QPointF(-0.38 * r, -0.62 * r), 0.16 * r, 0.26 * r)
+    p.restore()
+
+
+def zeichne_osterkorb(p, voll=3):
+    """Weidenkörbchen mit Henkel, Boden im Ursprung, 'voll' bunte Eier darin."""
+    p.setBrush(KEIN_PINSEL)
+    p.setPen(stift(QColor('#8A5A2B'), 3.5))
+    p.drawArc(QRectF(-14, -36, 28, 40), 0, 180 * 16)
+    p.setPen(KEIN_STIFT)
+    for k in range(voll):
+        zeichne_osterei(p, -8 + k * 8, -18 - (k % 2) * 3, 5.5, EI_FARBEN[k % len(EI_FARBEN)], k % 3,
+                        -15 + k * 15)
+    p.setBrush(QColor('#9CCB5A'))
+    for k in range(6):
+        gras = QPainterPath()
+        gras.moveTo(-16 + k * 6, -12)
+        gras.lineTo(-14 + k * 6, -21 + (k % 2) * 3)
+        gras.lineTo(-11 + k * 6, -12)
+        p.drawPath(gras)
+    p.setBrush(linear(0, -14, 0, 2, QColor('#D8A462'), QColor('#8A5A2B')))
+    p.drawRoundedRect(QRectF(-17, -14, 34, 16), 5, 5)
+    p.setPen(stift(QColor(110, 70, 30, 150), 1.2))
+    for k in range(5):
+        p.drawLine(QPointF(-14 + k * 7, -13), QPointF(-12 + k * 7, 1))
+    p.drawLine(QPointF(-16, -7), QPointF(16, -7))
+    p.setPen(KEIN_STIFT)
+
+
+def zeichne_pinsel(p, farbe, laenge=46):
+    """Pinsel, Griff im Ursprung, Borsten nach unten (+y)."""
+    p.setPen(KEIN_STIFT)
+    p.setBrush(linear(-2, 0, 2, 0, QColor('#E0B07A'), QColor('#9A6A38')))
+    p.drawRoundedRect(QRectF(-2.2, -4, 4.4, laenge * 0.7), 2, 2)
+    p.setBrush(QColor('#C8CCD4'))
+    p.drawRect(QRectF(-2.8, laenge * 0.62, 5.6, 5))
+    borsten = QPainterPath()
+    borsten.moveTo(-2.8, laenge * 0.62 + 5)
+    borsten.quadTo(-3.5, laenge * 0.9, 0, laenge)
+    borsten.quadTo(3.5, laenge * 0.9, 2.8, laenge * 0.62 + 5)
+    p.setBrush(farbe)
+    p.drawPath(borsten)
+
+
+def zeichne_hasenohren(p, x, y, wackel=0.0):
+    """Haarreif mit Plüsch-Hasenohren, Mitte des Reifs bei (x, y)."""
+    p.setPen(KEIN_STIFT)
+    for ox, w in ((-9, -14), (9, 10)):
+        p.save()
+        p.translate(x + ox, y - 6)
+        p.rotate(w + wackel * (1 if ox > 0 else -1))
+        p.setBrush(linear(-7, 0, 7, 0, QColor('#FFFFFF'), QColor('#D8D2CC')))
+        p.drawEllipse(QRectF(-8, -46, 16, 48))
+        p.setBrush(QColor('#F5B8C6'))
+        p.drawEllipse(QRectF(-4, -40, 8, 34))
+        p.restore()
+    p.setBrush(QColor('#E85A8A'))
+    p.drawChord(QRectF(x - 26, y - 14, 52, 26), 20 * 16, 140 * 16)

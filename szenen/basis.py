@@ -21,6 +21,7 @@ ihnen, etwa Mit('wichtel', Gehe(bis=...)) oder Nebenbei(Mit('wichtel', Renne()))
 """
 import math
 import random
+from dataclasses import replace
 
 from PyQt6.QtCore import QPointF, QRectF
 from PyQt6.QtGui import QTransform
@@ -62,6 +63,7 @@ class Szene:
         self.stauchen = 1.0
         self.phase = 0.0
         self.pose = Pose()
+        self.pose_fest = {}             # gilt für jede Pose, z. B. {'muetze': False} nach Mützenverlust
         self.zeige_figur = True
         self.striche = False
         self.teilchen = []              # Listen mit Funken, Rauch usw.
@@ -140,11 +142,14 @@ class Szene:
                                   random.uniform(*r) * s, random.uniform(*r) * s * (0.6 if schwer else 1.6),
                                   c, art))
 
-    def schreck_alle(self, weihnachtsmann=True, hoehe=40):
-        """Schreck für Szenen mit mehreren Figuren: wer zu sehen ist, hüpft und rennt zum nächsten Rand."""
+    def schreck_alle(self, weihnachtsmann=True, hoehe=40, ausser=()):
+        """Schreck für Szenen mit mehreren Figuren: wer zu sehen ist, hüpft und rennt zum nächsten Rand.
+        ausser: Darsteller mit eigenem Schreck."""
         self.nebenbei.clear()
         neu = []
         for name, d in self.darsteller.items():
+            if name in ausser:
+                continue
             if d.zeige_figur and d.figur_sichtbar():
                 neu.append(Nebenbei(Mit(name, Erschrecke(0.35, hoehe)), Mit(name, Renne(zum='rand'))))
             else:
@@ -207,7 +212,8 @@ class Szene:
     # -- Zeichnen
 
     def zeichne_figur(self, p, zwischen=None):
-        figur(p, self.x, self.y - self.hopp, self.s, self.richtung, self.pose, zwischen,
+        pose = replace(self.pose, **self.pose_fest) if self.pose_fest else self.pose
+        figur(p, self.x, self.y - self.hopp, self.s, self.richtung, pose, zwischen,
               self.stauchen, self.neigung)
 
     def zeichne(self, p):
@@ -671,6 +677,29 @@ class Rutsche(Renne):
     def weiter(self, sz, u, dt):
         super().weiter(sz, u, dt)
         sz.pose = self.pose(sz, u) if callable(self.pose) else self.pose
+
+    def ende(self, sz):
+        super().ende(sz)
+        sz.hopp = 0.0
+
+
+def hoppel_pose(phase, t):
+    f = abs(math.sin(phase))
+    return Pose(bein_v=45 * f, bein_h=55 * f, arm_v=-35 * f, arm_h=-20 * f, auge_zu=blinzeln(t))
+
+
+class Hoppel(Gehe):
+    """Hoppelt in Sprüngen wie ein Hase; hoehe in Einheiten je Hopser."""
+    pose_fn = staticmethod(hoppel_pose)
+    schrittlaenge = 30
+
+    def __init__(self, bis=None, tempo=1.0, hoehe=26, dauer=None, haltung=None):
+        super().__init__(bis, tempo, dauer, haltung)
+        self.hoehe = hoehe
+
+    def weiter(self, sz, u, dt):
+        super().weiter(sz, u, dt)
+        sz.hopp = abs(math.sin(sz.phase)) * self.hoehe * sz.s
 
     def ende(self, sz):
         super().ende(sz)

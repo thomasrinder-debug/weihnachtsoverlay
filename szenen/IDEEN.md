@@ -104,3 +104,17 @@ Diese Szenen tun nur so, als veränderten sie andere Programme. `abgreifen.py` h
 | tippkatze | getippte Zeile | nach einer Tipppause öffnet sich ein Spalt zwischen zwei Wörtern, eine Katze schaut heraus, trampelt auf der Zeile, Buchstaben hüpfen und tauschen die Plätze; nur über den eigenen Auslöser in der Automatik, liegt ausnahmsweise mitten im Bild |
 
 Verworfen (Thomas, November 2026): tanzende Desktopsymbole, platzendes Taskleistensymbol.
+
+## Sechste Runde: Osterhasen und Winkekatzen
+
+Wunsch von Thomas: Osterhasen und Glückskatzen (Winkekatze mit erhobener Pfote). Beide frei gestaltet: ein brauner Hase mit langen Ohren, Puschelschwanz und mintgrüner Schleife (`Osterhase` in `zeichnen/figuren.py`, mit Körbchen, Pinsel, Mütze oder bunten Streifen) und eine dreifarbige Porzellankatze mit rotem Halsband, Glöckchen und goldener Münze ohne Schrift (`Winkekatze`, Winkel der Pfote in `wink`). Nichts Religiöses, nur Hase, Eier, Körbchen. Gemeinsames (hüpfende Eier, Winkemechanik, Propeller-Schreck der Katze) in `szenen/ostern.py`, dazu in `basis.py` der Schritt `Hoppel` und `pose_fest` (etwa `{'muetze': False}` für die ganze Szene).
+
+| Name | Rand | Gag |
+|---|---|---|
+| winkekatze | unten | winkt schneller und schneller, die Pfote wird zum Propeller, sie hebt ab, stottert, plumpst herunter und sieht Sterne; ein winziges vorsichtiges Winken, und schon fliegt sie davon |
+| herbeiwinken | unten + Seite | die Katze winkt ihn herbei, seine Beine rennen davon, er wird trotzdem rückwärts herangezogen; ein Wisch nach oben schießt ihn senkrecht aus dem Bild, die Mütze segelt auf die Katze |
+| eiersuche | unten | Hase versteckt drei Eier, er wirft zwei über die Schulter in den Sack, das dritte hüpft davon und über seinen Kopf, Hechtsprung hinterher; das Ei kommt zurück und hüpft in den Korb |
+| eimalen | unten | Hase bemalt ein Riesenei, Triumph, es kippelt, rollt weg und zurück und überrollt ihn; er steht gestreift wieder auf |
+| rollentausch | unten | Puff: er trägt Hasenohren und hoppelt immer höher bis auf den Hosenboden, der Hase mit Mütze wird vom Sack plattgedrückt; Puff, alles zurück |
+
+Schreck: die Winkekatze fliegt mit der Propellerpfote zum nächsten Rand, Hasen hoppeln davon, Eier kullern hinaus.
