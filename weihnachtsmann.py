@@ -32,6 +32,7 @@ from PyQt6.QtGui import QIcon, QPainter, QPixmap
 from PyQt6.QtWidgets import QApplication, QMenu, QMessageBox, QSystemTrayIcon, QWidget
 
 import abgreifen
+import schoner
 from szenen import finde_szenen
 from zeichnen.figur import zeichne_kopf_vorn
 from zeichnen.grundlagen import FIGUR_HOEHE
@@ -68,6 +69,12 @@ def letzte_eingabe():
 def ruhe_seit(zeitstempel):
     """Sekunden seit einem Zeitstempel von letzte_eingabe()."""
     return ((ctypes.windll.kernel32.GetTickCount() - zeitstempel) & 0xFFFFFFFF) / 1000
+
+
+def schoner_laeuft():
+    an = wintypes.BOOL()
+    user32.SystemParametersInfoW(0x0072, 0, ctypes.byref(an), 0)    # SPI_GETSCREENSAVERRUNNING
+    return bool(an.value)
 
 
 def mauslage():
@@ -143,7 +150,7 @@ class Overlay(QWidget):
         self.wecker.start(int(sekunden * 1000))
 
     def von_selbst(self):
-        if self.szene:
+        if self.szene or schoner_laeuft():
             self.planen()
         else:
             self.start()
@@ -165,7 +172,8 @@ class Overlay(QWidget):
         self.tasten = 0
         self.katze_nach = random.uniform(2.0, 4.0)
         jetzt = self.uhr.elapsed() / 1000
-        if ruhe < 6 and jetzt >= self.katze_ab and not self.szene and self.start('tippkatze'):
+        if (ruhe < 6 and jetzt >= self.katze_ab and not self.szene and not schoner_laeuft()
+                and self.start('tippkatze')):
             self.katze_ab = jetzt + random.uniform(*self.katzenpause)
 
     def start(self, name=None):
@@ -262,6 +270,13 @@ class TastenFilter(QAbstractNativeEventFilter):
 
 
 def main():
+    if schoner.ist_schoner(sys.argv):       # als Weihnachtsmann.scr oder mit /s, /p, /c
+        schoner.main(sys.argv)
+        return
+    if '--sperren' in sys.argv[1:]:          # Verknüpfung „Sperren mit Weihnachtsmann“
+        app = QApplication(sys.argv[:1])
+        schoner.sperren_oder_hinweis()
+        return
     ap = argparse.ArgumentParser(description='Weihnachtsmann-Szenen über dem Bildschirm.')
     ap.add_argument('--monitor', type=int, default=0, help='Bildschirm 1, 2, ... (Standard: Hauptbildschirm)')
     ap.add_argument('--liste', action='store_true', help='Bildschirme auflisten und beenden')
@@ -273,6 +288,8 @@ def main():
     ap.add_argument('--pause', type=float, nargs=2, default=(20, 180), metavar=('KURZ', 'LANG'),
                     help='Pausen der Automatik in Sekunden (Standard: 20 180)')
     ap.add_argument('--manuell', action='store_true', help='Automatik beim Start aus, nur Tastenkürzel')
+    ap.add_argument('--sperren', action='store_true',
+                    help='Bildschirmschoner sofort starten, danach Sperrbildschirm (muss eingerichtet sein)')
     ap.add_argument('--katzenpause', type=float, nargs=2, default=(45, 240), metavar=('KURZ', 'LANG'),
                     help='Abstand zwischen zwei Besuchen der Tippkatze in Sekunden (Standard: 45 240)')
     a = ap.parse_args()
@@ -365,6 +382,8 @@ def infobereich(app, overlay, namen):
     menue.addSeparator()
     for i, name in enumerate(namen):
         menue.addAction(f'{SZENEN[name].titel or name}\tStrg+Alt+{i + 1}', lambda n=name: overlay.start(n))
+    menue.addSeparator()
+    menue.addAction('Sperren mit Weihnachtsmann\tStrg+Alt+L', schoner.sperren_oder_hinweis)
     menue.addSeparator()
     menue.addAction('Beenden\tStrg+Alt+Q', app.quit)
     symbol.setContextMenu(menue)
