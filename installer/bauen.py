@@ -117,6 +117,7 @@ def main():
     pruefen(test, erwartet)
     app = pyinstaller('Weihnachtsmann', konsole=False)
     shutil.copy(app / 'Weihnachtsmann.exe', app / 'Weihnachtsmann.scr')
+    shutil.copy(PROJ / 'LICENSE', app / 'LICENSE')
     setup(app, version)
 
 
