@@ -27,6 +27,12 @@ Beim Start erscheint ein Symbol im Infobereich mit Menü.
 
 Optionen: `--monitor 2` (Beamer), `--groesse 0.2`, `--pause 10 60`, `--manuell`, `--mutig` (erschrickt nicht), `--sofort [szene]`, `--liste`.
 
+## Als Bildschirmschoner
+
+Das Setup legt neben `Weihnachtsmann.exe` auch `Weihnachtsmann.scr` ab, schaltet den Bildschirmschoner aber nicht ein. Einrichten: im Startmenü „Weihnachtsmann als Bildschirmschoner einrichten“ (oder Rechtsklick auf die `.scr` → „Installieren“). Danach öffnen sich die Bildschirmschoner-Einstellungen von Windows, dort Wartezeit und „Anmeldeseite bei Reaktivierung“ wählen. „Einstellungen“ öffnet Figurgröße, Pause zwischen den Szenen und Schneefall (gespeichert in `%APPDATA%\Weihnachtsmann\schoner.ini`).
+
+Im Schoner laufen die Szenen ohne Pause nacheinander vor einem Winterhimmel, auf allen Bildschirmen. Bewegt jemand die Maus, klickt oder drückt eine Taste, erschrecken die Figuren kurz, dann ist der Schoner nach höchstens etwa einer Sekunde weg. Die Tippkatze und Szenen, die Bildschirmfotos brauchen, laufen dort nicht. Aus dem Quellcode: `python weihnachtsmann.py /s` (Vollbild), `/p <hwnd>` (Vorschau), `/c` (Einstellungen).
+
 ## Szenen prüfen
 
 `python pruefen.py` rendert alle Szenen als Vorschaubilder nach `vorschau/` und testet den Schreck. Wie neue Szenen entstehen, steht in `CLAUDE.md`.

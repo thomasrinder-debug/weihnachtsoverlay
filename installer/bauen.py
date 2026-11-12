@@ -8,6 +8,9 @@
 3. Der Ordner wird gezippt; IExpress (gehört zu Windows) baut daraus ein Setup, das
    installieren.ps1 ausführt: Installation nach %LOCALAPPDATA%\\Programs\\Weihnachtsmann,
    Verknüpfungen in Startmenü und auf dem Desktop, Eintrag unter „Apps“ zum Deinstallieren.
+   Neben Weihnachtsmann.exe liegt Weihnachtsmann.scr, dieselbe Datei als Bildschirmschoner
+   (schoner.py); sie nutzt denselben Ordner _internal. Das Setup aktiviert ihn nicht, dafür gibt
+   es im Startmenü „Weihnachtsmann als Bildschirmschoner einrichten“.
 """
 import pathlib
 import shutil
@@ -80,7 +83,7 @@ SourceFiles=SourceFiles
 [Strings]
 InstallPrompt=Weihnachtsmann-Overlay {version} installieren?
 DisplayLicense=
-FinishMessage=Fertig. Das Overlay läuft jetzt (Symbol im Infobereich). Strg+Alt+W startet eine Szene, Strg+Alt+A schaltet die Automatik, Strg+Alt+Q beendet.
+FinishMessage=Fertig. Das Overlay läuft jetzt (Symbol im Infobereich). Strg+Alt+W startet eine Szene, Strg+Alt+A schaltet die Automatik, Strg+Alt+Q beendet. Als Bildschirmschoner: im Startmenü „Weihnachtsmann als Bildschirmschoner einrichten“.
 TargetName={ziel}
 FriendlyName=Weihnachtsmann-Overlay
 AppLaunched={befehl}
@@ -113,6 +116,7 @@ def main():
     test = pyinstaller('WeihnachtsmannTest', konsole=True)
     pruefen(test, erwartet)
     app = pyinstaller('Weihnachtsmann', konsole=False)
+    shutil.copy(app / 'Weihnachtsmann.exe', app / 'Weihnachtsmann.scr')
     setup(app, version)
 
 
