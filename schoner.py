@@ -14,6 +14,7 @@ import ctypes
 import os
 import pathlib
 import random
+import sys
 import threading
 import time
 from ctypes import wintypes
@@ -403,6 +404,88 @@ def vorschau(app, werte, hwnd):
     pruefen.timeout.connect(lambda: None if user32.IsWindow(hwnd) else app.exit(0))
     pruefen.start(300)
     app.exec()
+
+
+# ---------------------------------------------------------------- Sperren mit Weihnachtsmann
+
+def langer_pfad(pfad):
+    puffer = ctypes.create_unicode_buffer(1024)
+    if ctypes.windll.kernel32.GetLongPathNameW(pfad, puffer, 1024):
+        return puffer.value
+    return pfad
+
+
+def schoner_einstellung():
+    """(ist unser Schoner gewählt und aktiv, ist „Anmeldeseite bei Reaktivierung“ an)"""
+    import winreg
+    werte = {}
+    try:
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r'Control Panel\Desktop') as k:
+            for n in ('SCRNSAVE.EXE', 'ScreenSaveActive', 'ScreenSaverIsSecure'):
+                try:
+                    werte[n] = str(winreg.QueryValueEx(k, n)[0])
+                except FileNotFoundError:
+                    werte[n] = ''
+    except OSError:
+        return False, False
+    pfad = werte['SCRNSAVE.EXE']
+    unser = bool(pfad) and pathlib.Path(langer_pfad(pfad)).name.lower() == 'weihnachtsmann.scr'
+    return unser and werte['ScreenSaveActive'] != '0', werte['ScreenSaverIsSecure'] == '1'
+
+
+def sperren():
+    """Lässt Windows den eingerichteten Schoner sofort starten. Weil Windows ihn startet, gilt
+    „Anmeldeseite bei Reaktivierung“: nach dem Schreck kommt der Sperrbildschirm. False, wenn
+    dafür etwas nicht eingerichtet ist."""
+    unser, sicher = schoner_einstellung()
+    if not (unser and sicher):
+        return False
+    user32.SendMessageW.argtypes = [wintypes.HWND, ctypes.c_uint, wintypes.WPARAM, wintypes.LPARAM]
+    user32.SendMessageW(user32.GetDesktopWindow(), 0x0112, 0xF140, 0)     # WM_SYSCOMMAND, SC_SCREENSAVE
+    # Startet Windows den Schoner nicht (etwa weil ein Programm den Bildschirm wachhält),
+    # trotzdem sperren: Wer „Sperren“ wählt, soll nie einen offenen Rechner zurücklassen.
+    ende = time.monotonic() + 3.0
+    while time.monotonic() < ende:
+        if schoner_laeuft():
+            return True
+        time.sleep(0.1)
+    user32.LockWorkStation()
+    return True
+
+
+def schoner_laeuft():
+    an = wintypes.BOOL()
+    user32.SystemParametersInfoW(0x0072, 0, ctypes.byref(an), 0)    # SPI_GETSCREENSAVERRUNNING
+    if an.value:
+        return True
+    import subprocess
+    aus = subprocess.run(['tasklist', '/FI', 'IMAGENAME eq Weihnachtsmann.scr', '/NH'], capture_output=True,
+                         encoding='mbcs', errors='replace', creationflags=0x08000000).stdout or ''
+    return 'weihnachtsmann.scr' in aus.lower()
+
+
+def sperren_oder_hinweis(eltern=None):
+    """Für Verknüpfung und Menü: sperren, sonst erklären, was fehlt, und beim Einrichten helfen."""
+    from PyQt6.QtWidgets import QMessageBox
+    if sperren():
+        return
+    unser, _ = schoner_einstellung()
+    text = ('„Sperren mit Weihnachtsmann“ startet den Bildschirmschoner sofort; nach dem Schreck '
+            'kommt der Sperrbildschirm.\n\nDafür in den Bildschirmschoner-Einstellungen '
+            + ('„Anmeldeseite bei Reaktivierung“ ankreuzen.' if unser else
+               '„Weihnachtsmann“ auswählen und „Anmeldeseite bei Reaktivierung“ ankreuzen.'))
+    box = QMessageBox(QMessageBox.Icon.Information, 'Weihnachtsmann', text, parent=eltern)
+    einrichten = box.addButton('Einstellungen öffnen', QMessageBox.ButtonRole.AcceptRole)
+    box.addButton('Abbrechen', QMessageBox.ButtonRole.RejectRole)
+    box.exec()
+    if box.clickedButton() is einrichten:
+        import subprocess
+        scr = pathlib.Path(sys.executable).with_name('Weihnachtsmann.scr')
+        rundll = pathlib.Path(os.environ.get('SystemRoot', r'C:\Windows')) / 'System32' / 'rundll32.exe'
+        if scr.exists():
+            subprocess.Popen(f'"{rundll}" desk.cpl,InstallScreenSaver {scr}')     # Pfad ohne Anführungszeichen
+        else:
+            subprocess.Popen(['control.exe', 'desk.cpl,,@screensaver'])
 
 
 # ---------------------------------------------------------------- Start

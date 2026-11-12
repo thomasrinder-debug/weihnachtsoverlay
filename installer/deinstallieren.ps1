@@ -6,6 +6,7 @@ Start-Sleep -Milliseconds 500
 Remove-Item (Join-Path ([Environment]::GetFolderPath('Programs')) 'Weihnachtsmann.lnk') -Force
 Remove-Item (Join-Path ([Environment]::GetFolderPath('Desktop')) 'Weihnachtsmann.lnk') -Force
 Remove-Item (Join-Path ([Environment]::GetFolderPath('Programs')) 'Weihnachtsmann als Bildschirmschoner einrichten.lnk') -Force
+Remove-Item (Join-Path ([Environment]::GetFolderPath('Programs')) 'Sperren mit Weihnachtsmann.lnk') -Force
 # War er als Bildschirmschoner gewählt, die Auswahl entfernen (sonst zeigt Windows einen toten Eintrag).
 $desk = 'HKCU:\Control Panel\Desktop'
 $gewaehlt = (Get-ItemProperty $desk -Name 'SCRNSAVE.EXE').'SCRNSAVE.EXE'

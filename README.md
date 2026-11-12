@@ -31,6 +31,8 @@ Optionen: `--monitor 2` (Beamer), `--groesse 0.2`, `--pause 10 60`, `--manuell`,
 
 Das Setup legt neben `Weihnachtsmann.exe` auch `Weihnachtsmann.scr` ab, schaltet den Bildschirmschoner aber nicht ein. Einrichten: im Startmenü „Weihnachtsmann als Bildschirmschoner einrichten“ (oder Rechtsklick auf die `.scr` → „Installieren“). Danach öffnen sich die Bildschirmschoner-Einstellungen von Windows, dort Wartezeit und „Anmeldeseite bei Reaktivierung“ wählen. „Einstellungen“ öffnet Figurgröße, Pause zwischen den Szenen und Schneefall (gespeichert in `%APPDATA%\Weihnachtsmann\schoner.ini`).
 
+**Beim Sperren:** „Sperren mit Weihnachtsmann“ (Startmenü, Strg+Alt+L oder Menü im Infobereich) lässt Windows den Schoner sofort starten. Ist in den Bildschirmschoner-Einstellungen „Weihnachtsmann“ gewählt und „Anmeldeseite bei Reaktivierung“ angekreuzt, kommt nach dem Schreck der Sperrbildschirm; fehlt das, erklärt ein Hinweis, was einzustellen ist. Startet Windows den Schoner nicht, wird nach 3 s ganz normal gesperrt. Mit Win+L geht das nicht: Win+L zeigt sofort den Sperrbildschirm, darauf kann kein Programm etwas anzeigen. Wer den Rechner einfach stehen lässt, bekommt nach der eingestellten Wartezeit ebenfalls den Schoner und danach die Anmeldeseite.
+
 Im Schoner laufen die Szenen ohne Pause nacheinander vor einem Winterhimmel, auf allen Bildschirmen. Bewegt jemand die Maus, klickt oder drückt eine Taste, erschrecken die Figuren kurz, dann ist der Schoner nach höchstens etwa einer Sekunde weg. Die Tippkatze und Szenen, die Bildschirmfotos brauchen, laufen dort nicht. Aus dem Quellcode: `python weihnachtsmann.py /s` (Vollbild), `/p <hwnd>` (Vorschau), `/c` (Einstellungen).
 
 ## Szenen prüfen

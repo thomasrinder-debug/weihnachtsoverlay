@@ -36,6 +36,15 @@ $lnk.WorkingDirectory = $Ziel
 $lnk.IconLocation = "$exe,0"
 $lnk.Description = 'Weihnachtsmann als Bildschirmschoner auswaehlen (Windows-Einstellungen)'
 $lnk.Save()
+# Sperren mit Weihnachtsmann (Strg+Alt+L): Windows startet den Schoner sofort, nach dem Schreck
+# kommt der Sperrbildschirm. Ist das nicht eingerichtet, erklärt ein Hinweis, was fehlt.
+$lnk = $shell.CreateShortcut((Join-Path ([Environment]::GetFolderPath('Programs')) 'Sperren mit Weihnachtsmann.lnk'))
+$lnk.TargetPath = $exe
+$lnk.Arguments = '--sperren'
+$lnk.WorkingDirectory = $Ziel
+$lnk.Hotkey = 'CTRL+ALT+L'
+$lnk.Description = 'Bildschirmschoner starten, danach Sperrbildschirm (Strg+Alt+L)'
+$lnk.Save()
 
 $schluessel = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Weihnachtsmann'
 New-Item -Path $schluessel -Force | Out-Null
