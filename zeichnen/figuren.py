@@ -1,5 +1,5 @@
 """Weitere Figuren: Lebkuchenmann, Schneemann, Wichtel, Pinguin, Nussknacker,
-Tannenbaum, Eisbär und Rentier.
+Tannenbaum, Eisbär, Rentier, Katze, Frostfee, Osterhase und Winkekatze.
 
 Jede Figur ist eine Klasse mit KASTEN (Umriss in Einheiten, Fuß im Ursprung,
 Blick nach rechts), KOPF (Punkt über dem Kopf für die Schreckstriche) und
@@ -13,7 +13,7 @@ from PyQt6.QtGui import QColor, QPainterPath, QTransform
 
 from .grundlagen import *  # noqa: F401,F403  Farben und Hilfen
 from .figur import zeichne_weihnachtsmann
-from .requisiten import zeichne_rentier
+from .requisiten import EI_FARBEN, zeichne_muetze_lose, zeichne_osterkorb, zeichne_pinsel, zeichne_rentier
 
 KEKS = QColor('#C98A4B')
 KEKS_DUNKEL = QColor('#8A4F22')
@@ -1199,3 +1199,314 @@ class Weihnachtsmann:
     @staticmethod
     def zeichne(p, d):
         zeichne_weihnachtsmann(p, d.pose)
+
+
+# ---------------------------------------------------------------- Osterhase
+
+HASE = (QColor('#C9A27C'), QColor('#8A6446'), QColor('#FFF4E6'))
+
+
+def _hasenohr(p, x, y, winkel, knick, hell, dunkel):
+    """Langes Ohr, Ansatz bei (x, y); knick (Grad) klappt die obere Hälfte um."""
+    p.save()
+    p.translate(x, y)
+    p.rotate(winkel)
+    p.setBrush(linear(-8, 0, 8, 0, hell.lighter(108), dunkel))
+    p.drawRoundedRect(QRectF(-8, -34, 16, 40), 8, 8)
+    p.setBrush(QColor('#F2AFC0'))
+    p.drawRoundedRect(QRectF(-4, -30, 8, 32), 4, 4)
+    p.translate(0, -28)
+    p.rotate(knick)
+    p.setBrush(linear(-8, 0, 8, 0, hell.lighter(108), dunkel))
+    p.drawRoundedRect(QRectF(-8, -34, 16, 40), 8, 8)
+    p.setBrush(QColor('#F2AFC0'))
+    p.drawRoundedRect(QRectF(-4, -28, 8, 30), 4, 4)
+    p.restore()
+
+
+class Osterhase:
+    """Osterhase mit langen Ohren, Puschelschwanz und Frühlingsschleife. Merkmale:
+    d.korb (Eier im Körbchen, 0 = ohne), d.pinsel (Farbe oder None), d.muetze (Weihnachtsmütze),
+    d.streifen (bunt gestreift, nachdem ihn ein frisch bemaltes Ei überrollt hat),
+    d.knick (Grad, das vordere Ohr knickt ab)."""
+    KASTEN = QRectF(-56, -222, 116, 228)
+    KOPF = (12, -214)
+
+    @staticmethod
+    def zeichne(p, d):
+        pose, t = d.pose, d.t
+        hell, dunkel, bauch = HASE
+        knick = getattr(d, 'knick', 0.0)
+
+        def bein(winkel, hinten):
+            k = 125 if hinten else 100
+            p.save()
+            p.translate(-4 if hinten else 4, -36)
+            p.rotate(winkel)
+            p.setBrush(radial(-4, 4, 26, hell.darker(k - 8), dunkel.darker(k)))
+            p.drawEllipse(QRectF(-15, -14, 28, 32))
+            p.setBrush(bauch.darker(k))
+            p.drawRoundedRect(QRectF(-8, 23, 36, 13), 6.5, 6.5)
+            p.setBrush(hell.darker(k))
+            p.drawRoundedRect(QRectF(-10, 20, 32, 12), 6, 6)
+            p.restore()
+
+        def arm(winkel, hinten):
+            k = 125 if hinten else 100
+            p.save()
+            p.translate(10, -96)
+            p.rotate(winkel)
+            p.setBrush(linear(-6, 0, 6, 0, hell.darker(k - 10), dunkel.darker(k)))
+            p.drawRoundedRect(QRectF(-6, -4, 12, 36), 6, 6)
+            p.setBrush(bauch.darker(k))
+            kreis(p, 0, 32, 6.5)
+            if not hinten:
+                korb = getattr(d, 'korb', 0)
+                pinsel = getattr(d, 'pinsel', None)
+                if korb:
+                    p.save()
+                    p.translate(0, 34)
+                    p.rotate(-winkel)
+                    p.translate(0, 16)
+                    zeichne_osterkorb(p, korb)
+                    p.restore()
+                if pinsel is not None:
+                    p.save()
+                    p.translate(2, 30)
+                    p.rotate(-120)
+                    zeichne_pinsel(p, pinsel)
+                    p.restore()
+            p.restore()
+
+        if pose.schreck > 0.2:
+            ohr = (-4, 10, 0)
+        else:
+            w = math.sin(t * 2.2) * 3
+            ohr = (-14 + w, 12 - w, knick)
+        arm(pose.arm_h, True)
+        bein(pose.bein_h, True)
+        flausch(p, [(-30, -44), (-36, -48), (-32, -54), (-38, -42), (-27, -52)], 7)
+        rumpf = QPainterPath()
+        rumpf.addEllipse(QRectF(-30, -112, 62, 86))
+        p.setBrush(radial(-6, -84, 70, hell.lighter(112), dunkel))
+        p.drawPath(rumpf)
+        p.setBrush(radial(14, -66, 34, WEISS, bauch))
+        p.drawEllipse(QRectF(-4, -98, 32, 64))
+        if getattr(d, 'streifen', False):
+            p.save()
+            p.setClipPath(rumpf)
+            for k, c in enumerate((EI_FARBEN[0], EI_FARBEN[2], EI_FARBEN[4])):
+                p.setBrush(c)
+                p.drawRect(QRectF(-40, -94 + k * 20, 90, 9))
+            p.restore()
+        bein(pose.bein_v, False)
+        # Kopf
+        kx, ky = 14, -134
+        bx = 0 if pose.kopf_vorn else 5
+        muetze = getattr(d, 'muetze', False)
+        if muetze:
+            _hasenohr(p, kx - 14, ky - 14, -40 + ohr[0] * 0.3, 15, hell, dunkel)
+            _hasenohr(p, kx + 14, ky - 14, 40 + ohr[1] * 0.3, -15, hell, dunkel)
+        else:
+            _hasenohr(p, kx - 9, ky - 18, ohr[0], -ohr[2] * 0.3, hell, dunkel)
+            _hasenohr(p, kx + 9, ky - 18, ohr[1], ohr[2], hell, dunkel)
+        p.setBrush(radial(kx - 6, ky - 10, 36, hell.lighter(118), dunkel))
+        p.drawEllipse(QPointF(kx, ky), 25, 23)
+        p.setBrush(QColor('#7FC8A9'))
+        for dx in (-1, 1):
+            schleife = QPainterPath()
+            schleife.moveTo(kx, ky + 23)
+            schleife.lineTo(kx + dx * 14, ky + 16)
+            schleife.lineTo(kx + dx * 14, ky + 30)
+            schleife.closeSubpath()
+            p.drawPath(schleife)
+        kreis(p, kx, ky + 23, 4)
+        p.setBrush(radial(kx + bx, ky + 8, 14, WEISS, bauch))
+        p.drawEllipse(QPointF(kx + bx - 6, ky + 9), 8, 7)
+        p.drawEllipse(QPointF(kx + bx + 6, ky + 9), 8, 7)
+        wangen(p, (kx + bx - 15, kx + bx + 15), ky + 5, 5)
+        augen(p, (kx + bx - 9, kx + bx + 9), ky - 4, 4.4, 5.6, pose, (blick_x(pose) * 0.6, pose.blick_y), 0.6)
+        brauen(p, (kx + bx - 9, kx + bx + 9), ky - 13, 6, pose, dunkel)
+        zucken = 0.6 * math.sin(t * 17) if math.sin(t * 1.3) > 0.4 else 0.0
+        p.setBrush(QColor('#E86A8A'))
+        nase = QPainterPath()
+        nase.moveTo(kx + bx - 4, ky + 3 + zucken)
+        nase.lineTo(kx + bx + 4, ky + 3 + zucken)
+        nase.lineTo(kx + bx, ky + 7 + zucken)
+        nase.closeSubpath()
+        p.drawPath(nase)
+        if pose.schreck > 0.2 or pose.mund_offen:
+            mund(p, kx + bx, ky + 15, 8, pose, QColor('#5A1A1A'))
+        p.setBrush(WEISS)
+        p.drawRoundedRect(QRectF(kx + bx - 3.5, ky + 12, 3.3, 5.5), 1, 1)
+        p.drawRoundedRect(QRectF(kx + bx + 0.2, ky + 12, 3.3, 5.5), 1, 1)
+        p.setPen(stift(QColor(90, 60, 40, 170), 0.9))
+        for sx in (-1, 1):
+            for dy in (-2, 2):
+                p.drawLine(QPointF(kx + bx + sx * 10, ky + 9), QPointF(kx + bx + sx * 26, ky + 8 + dy * 2.2))
+        p.setPen(KEIN_STIFT)
+        if muetze:
+            p.save()
+            p.translate(kx - 2, ky - 17)
+            p.scale(0.85, 0.85)
+            zeichne_muetze_lose(p)
+            p.restore()
+        arm(pose.arm_v, False)
+
+
+# ---------------------------------------------------------------- Winkekatze
+
+PORZELLAN = QColor('#D9D4CC')
+
+
+class Winkekatze:
+    """Sitzende Glückskatze aus Porzellan mit erhobener Winkepfote, Halsband mit Glöckchen und
+    goldener Münze. Sitzt immer frontal. d.wink: Winkel der Winkepfote in Grad (180 = senkrecht
+    nach oben), d.unschaerfe (0..1): Pfote dreht sich zu schnell, d.froh: Lachaugen,
+    d.muetze: trägt eine Weihnachtsmütze."""
+    KASTEN = QRectF(-82, -196, 164, 202)
+    KOPF = (0, -164)
+
+    @staticmethod
+    def zeichne(p, d):
+        pose, t = d.pose, d.t
+        wink = getattr(d, "wink", 145 + 20 * math.sin(t * 6))
+        unschaerfe = getattr(d, 'unschaerfe', 0.0)
+        orange, schwarz = QColor('#F0A04B'), QColor('#3A3436')
+        # Schwanz
+        p.setBrush(KEIN_PINSEL)
+        schwanz = QPainterPath()
+        schwanz.moveTo(18, -14)
+        schwanz.cubicTo(46, -10, 52, -38, 38, -48)
+        p.setPen(stift(PORZELLAN, 10))
+        p.drawPath(schwanz)
+        p.setPen(stift(orange, 10, Qt.PenStyle.DotLine))
+        p.drawPath(schwanz)
+        p.setPen(KEIN_STIFT)
+        # Körper
+        rumpf = QPainterPath()
+        rumpf.addEllipse(QRectF(-34, -88, 68, 92))
+        p.setBrush(radial(-12, -60, 70, WEISS, PORZELLAN))
+        p.drawPath(rumpf)
+        p.save()
+        p.setClipPath(rumpf)
+        p.setBrush(radial(-30, -40, 30, orange.lighter(110), orange.darker(115)))
+        p.drawEllipse(QRectF(-48, -60, 34, 40))
+        p.setBrush(schwarz)
+        p.drawEllipse(QRectF(16, -30, 26, 26))
+        p.restore()
+        # Füße
+        p.setBrush(radial(-12, -4, 14, WEISS, PORZELLAN))
+        p.drawEllipse(QRectF(-24, -12, 20, 14))
+        p.drawEllipse(QRectF(4, -12, 20, 14))
+        p.setPen(stift(QColor('#B9AFA4'), 1))
+        for fx in (-14, 14):
+            for dx in (-3, 3):
+                p.drawLine(QPointF(fx + dx, -4), QPointF(fx + dx, 1))
+        p.setPen(KEIN_STIFT)
+        # Münze mit Pfote
+        p.setBrush(linear(10, -70, 26, -30, GOLD_HELL, GOLD.darker(120)))
+        p.drawEllipse(QRectF(2, -74, 26, 40))
+        p.setBrush(KEIN_PINSEL)
+        p.setPen(stift(GOLD.darker(130), 1.6))
+        p.drawEllipse(QRectF(6, -69, 18, 30))
+        p.setPen(stift(QColor(255, 255, 255, 190), 2))
+        p.drawArc(QRectF(8, -66, 10, 22), 100 * 16, 80 * 16)
+        p.setPen(KEIN_STIFT)
+        p.setBrush(radial(18, -44, 12, WEISS, PORZELLAN))
+        p.drawEllipse(QRectF(6, -48, 22, 16))
+        # Kopf
+        ky = -118
+        for ox in (-1, 1):
+            ohr = QPainterPath()
+            ohr.moveTo(ox * 14, ky - 22)
+            ohr.lineTo(ox * 30, ky - 46)
+            ohr.lineTo(ox * 38, ky - 12)
+            ohr.closeSubpath()
+            p.setBrush(schwarz if ox > 0 else orange)
+            p.drawPath(ohr)
+            p.setBrush(QColor('#F4B6B6'))
+            innen = QPainterPath()
+            innen.moveTo(ox * 19, ky - 22)
+            innen.lineTo(ox * 29, ky - 38)
+            innen.lineTo(ox * 33, ky - 17)
+            innen.closeSubpath()
+            p.drawPath(innen)
+        kopf = QPainterPath()
+        kopf.addEllipse(QRectF(-40, ky - 32, 80, 62))
+        p.setBrush(radial(-14, ky - 16, 70, WEISS, PORZELLAN))
+        p.drawPath(kopf)
+        p.save()
+        p.setClipPath(kopf)
+        p.setBrush(orange)
+        p.drawEllipse(QRectF(-50, ky - 44, 38, 32))
+        p.setBrush(schwarz)
+        p.drawEllipse(QRectF(20, ky - 44, 30, 24))
+        p.restore()
+        p.setBrush(QColor(255, 255, 255, 210))
+        p.drawEllipse(QPointF(-6, ky - 22), 9, 4)
+        bx = pose.blick_x * 3
+        wangen(p, (-24, 24), ky + 8, 8)
+        if pose.schreck < 0.2 and not pose.auge_zu and getattr(d, 'froh', False):
+            p.setPen(stift(SCHWARZ, 2.6))
+            p.setBrush(KEIN_PINSEL)
+            for ax in (-14, 14):
+                p.drawArc(QRectF(ax - 7, ky - 6, 14, 10), 20 * 16, 140 * 16)
+            p.setPen(KEIN_STIFT)
+        else:
+            augen(p, (-14 + bx, 14 + bx), ky - 2, 6, 7, pose, (pose.blick_x, pose.blick_y), 0.55)
+        brauen(p, (-14, 14), ky - 14, 8, pose, QColor('#B49A80'))
+        p.setBrush(QColor('#E86A7A'))
+        nase = QPainterPath()
+        nase.moveTo(-4, ky + 6)
+        nase.lineTo(4, ky + 6)
+        nase.lineTo(0, ky + 10)
+        p.drawPath(nase)
+        if pose.schreck > 0.2 or pose.mund_offen:
+            mund(p, 0, ky + 16, 10, pose, QColor('#5A1A1A'))
+        else:
+            p.setPen(stift(SCHWARZ, 1.5))
+            p.setBrush(KEIN_PINSEL)
+            p.drawArc(QRectF(-6, ky + 7, 6, 6), 200 * 16, 140 * 16)
+            p.drawArc(QRectF(0, ky + 7, 6, 6), 200 * 16, 140 * 16)
+        p.setPen(stift(QColor(120, 110, 100, 200), 1))
+        for sx in (-1, 1):
+            for dy in (-3, 3):
+                p.drawLine(QPointF(sx * 12, ky + 9), QPointF(sx * 38, ky + 8 + dy * 2))
+        p.setPen(KEIN_STIFT)
+        # Halsband mit Glöckchen
+        p.setBrush(linear(0, ky + 22, 0, ky + 32, ROT_HELL, ROT_DUNKEL))
+        p.drawRoundedRect(QRectF(-28, ky + 23, 56, 9), 4.5, 4.5)
+        p.setBrush(radial(-2, ky + 34, 9, GOLD_HELL, GOLD.darker(115)))
+        kreis(p, 0, ky + 37, 7)
+        p.setBrush(GOLD.darker(150))
+        p.drawRect(QRectF(-4, ky + 38, 8, 1.6))
+        kreis(p, 0, ky + 41, 1.5)
+        if getattr(d, 'muetze', False):
+            p.save()
+            p.translate(2, ky - 26)
+            p.rotate(-8)
+            zeichne_muetze_lose(p)
+            p.restore()
+
+        def pfote(winkel, deckkraft=1.0):
+            p.save()
+            p.setOpacity(p.opacity() * deckkraft)
+            p.translate(-30, -76)
+            p.rotate(winkel)
+            p.setBrush(linear(-9, 0, 9, 0, WEISS, PORZELLAN))
+            p.drawRoundedRect(QRectF(-9, -4, 18, 40), 9, 9)
+            p.setBrush(radial(0, 40, 14, WEISS, PORZELLAN))
+            kreis(p, 0, 40, 12)
+            p.setBrush(QColor('#F2A7B4'))
+            kreis(p, 0, 43, 4.5)
+            for k in (-1, 0, 1):
+                kreis(p, k * 5.5, 35 - abs(k) * 1.5, 2.2)
+            p.restore()
+
+        if unschaerfe > 0.05:
+            p.setBrush(QColor(255, 255, 255, int(110 * unschaerfe)))
+            kreis(p, -30, -76, 52)
+            for k in range(1, 5):
+                pfote(wink - k * 16 * unschaerfe, 0.5 * (1 - k / 5))
+        pfote(wink)
