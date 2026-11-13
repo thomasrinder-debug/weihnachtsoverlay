@@ -3,7 +3,6 @@ import math
 from PyQt6.QtGui import QColor
 
 from zeichnen.figur import Pose
-from zeichnen.grundlagen import blinzeln
 from zeichnen.tiere import KEHLCHEN_BRAUN, KEHLCHEN_ROT, Rotkehlchen
 
 from .basis import Hoppel, Jeweils, Mit, Schritt, Setze, Stehe, Szene, Tu, Wandel, Warte

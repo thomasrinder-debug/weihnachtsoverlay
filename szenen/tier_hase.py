@@ -1,10 +1,9 @@
 import math
 
 from zeichnen.figur import Pose
-from zeichnen.grundlagen import blinzeln
 from zeichnen.tiere import Schneehase
 
-from .basis import (Ducke, Erschrecke, Gehe, Hoppel, Mit, Nebenbei, Renne, Setze, Stehe, Szene, Tu, Wandel, Warte,
+from .basis import (Ducke, Erschrecke, Gehe, Hoppel, Mit, Nebenbei, Renne, Setze, Stehe, Szene, Tu, Wandel,
                     WarteNebenbei)
 from .tier_gemeinsam import Flug, figur_mit_beinen, publikumsblick, puff, sterne
 

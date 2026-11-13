@@ -9,7 +9,7 @@ from zeichnen.tiere import Murmeltier, zeichne_schneedecke, zeichne_stiefel
 
 from .basis import (Erschrecke, Gehe, Hoppel, Jeweils, Mit, Nebenbei, Renne, Setze, Springe, Stehe, Szene, Tu,
                     Wandel, Warte, WarteNebenbei)
-from .tier_gemeinsam import Flug, figur_mit_beinen, publikumsblick, puff
+from .tier_gemeinsam import Flug, figur_mit_beinen, puff
 
 DECKE_B, DECKE_H = 170, 72
 

@@ -7,9 +7,9 @@ from zeichnen.grundlagen import KEIN_STIFT, blinzeln
 from zeichnen.requisiten import zeichne_muetze_lose, zeichne_schneehaufen
 from zeichnen.tiere import Dachs
 
-from .basis import (Erschrecke, Falle, Gehe, Jeweils, Mit, Renne, Schaue, Setze, Springe, Stehe, Szene, Tu,
+from .basis import (Erschrecke, Falle, Gehe, Jeweils, Mit, Renne, Setze, Springe, Stehe, Szene, Tu,
                     Wandel, Warte, WarteNebenbei, Nebenbei)
-from .tier_gemeinsam import figur_mit_beinen, publikumsblick, puff, sterne
+from .tier_gemeinsam import figur_mit_beinen, puff, sterne
 
 SITZ = 58          # Fußpunkt unter dem Boden, wenn er sitzt (Einheiten)
 

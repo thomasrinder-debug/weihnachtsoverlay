@@ -7,7 +7,7 @@ from zeichnen.figur import Pose
 from zeichnen.grundlagen import KEIN_STIFT, blinzeln
 from zeichnen.tiere import Robbe, zeichne_eisloch_hinten, zeichne_eisloch_vorn
 
-from .basis import Gleite, Jeweils, Mit, Setze, Stehe, Szene, Tu, Wandel, Warte, WarteNebenbei
+from .basis import Gleite, Jeweils, Mit, Setze, Stehe, Szene, Tu, Wandel, WarteNebenbei
 from .tier_gemeinsam import Flug, puff
 
 LOCH_B = 150       # Einheiten
