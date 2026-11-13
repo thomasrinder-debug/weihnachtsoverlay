@@ -77,7 +77,7 @@ def zeichne_sitzbeine(p, x, y, s, richtung, stiefel=True, spreiz=0.0):
     p.translate(x, y)
     p.scale(s * richtung, s)
     for hinten, dx in ((True, -6), (False, 4)):
-        fx, fy = 64 + dx - 40 * spreiz * (1 if hinten else -0.3), -6 - 60 * spreiz * (0 if hinten else 1)
+        fx, fy = 66 + dx, -52 - 50 * spreiz * (0 if hinten else 1)
         if stiefel:
             zeichne_bein_ik(p, dx, -68, fx, fy, hinten)
         else:
