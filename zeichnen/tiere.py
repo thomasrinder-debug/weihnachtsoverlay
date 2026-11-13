@@ -303,12 +303,21 @@ class Elch:
         p.restore()
 
 
-def elch_geweih_punkt(d):
-    """Bildpunkt oben auf dem Geweih eines Elch-Darstellers (berücksichtigt Nicken, nicht Kippen)."""
-    n = math.radians(getattr(d, 'nicken', 0.0))
-    x0, y0 = 30 - 0, -90
-    x, y = 56 + x0 * math.cos(n) - y0 * math.sin(n), -200 + x0 * math.sin(n) + y0 * math.cos(n)
+def elch_punkt(d, x, y, kopf=False):
+    """Bildpunkt zu (x, y) in Elch-Einheiten; kopf=True: Punkt am Kopf (dreht mit dem Nicken)."""
+    if kopf:
+        n = math.radians(getattr(d, 'nicken', 0.0))
+        x, y = 56 + x * math.cos(n) - y * math.sin(n), -200 + x * math.sin(n) + y * math.cos(n)
+    k = math.radians(getattr(d, 'kipp', 0.0))
+    if k:
+        px, py = getattr(d, 'drehpunkt', (150, 0))
+        x, y = px + (x - px) * math.cos(k) - (y - py) * math.sin(k), py + (x - px) * math.sin(k) + (y - py) * math.cos(k)
     return d.trafo().map(QPointF(x, y))
+
+
+def elch_geweih_punkt(d):
+    """Sitzplatz oben auf dem Geweih."""
+    return elch_punkt(d, -14, -106, kopf=True)
 
 
 # ---------------------------------------------------------------- Rotkehlchen
