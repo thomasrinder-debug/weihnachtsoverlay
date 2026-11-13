@@ -137,3 +137,19 @@ Zeichnungen in `zeichnen/werkstatt.py` (Fließband, Kiste und Spielzeugwanne, Bl
 | werk_schraubstock | unten | der Wichtel kurbelt den Bart in den Schraubstock, bekommt ihn nicht auf, der Bart wird meterlang; Schnapp, der Weihnachtsmann fliegt rückwärts in die Spielzeugwanne und rollt hinaus |
 
 Schreck: Wichtel und Weihnachtsmann rennen zum nächsten Rand, Requisiten verpuffen; wer gerade in Kiste, Wanne oder Walze steckt, fährt oder rollt darin davon.
+## Weihnachtsbäckerei
+
+Acht Szenen nach dem Muster der überarbeiteten Professor-Szenen: 11–12 s, Problem nach etwa 2 s, drei Versuche mit wachsendem Körpereinsatz, Erwartungspause, große körperliche Pointe, Blick ins Publikum. Requisiten in `zeichnen/baeckerei.py` (Teig mit Gesicht, Nudelholz, Sternausstecher, Spritzbeutel, Zuckergusshaube, Mehlsack, Backofen, Lebkuchenplatten, Bratapfel, Keksdose, Keksberg) und `Bestaeubt`, eine Hülle, die jede Figur mit Mehl überpudert. Gemeinsames (Publikumsblick, Flugbahn für Requisiten, Kopf- und Handlage des Weihnachtsmanns) in `szenen/back_bausteine.py`. Zimtstern und Keks als Sägeblatt gab es schon, Alkohol (Rumkugeln, Stollen mit Rum) bleibt draußen.
+
+| Name | Rand | Gag |
+|---|---|---|
+| back_nudelholz | unten | Teig federt zweimal zurück und schaut böse, beim dritten Mal hauchdünn, Triumph; dann schnurrt er zur Kugel, springt ihn an und wickelt ihn ein, er hoppelt als Teigrolle davon |
+| back_ausstecher | unten | Wichtel drückt und stampft auf die Sternform, der Teig wird zum Trampolin, schleudert ihn hoch, er landet in der Form und trägt sie als Ballettröckchen |
+| back_spritzbeutel | unten | kein Guss kommt, er schaut in die Tülle, der Beutel bläht sich: Tortenhaube auf dem Kopf, die Kirsche landet obendrauf |
+| back_mehl | unten | Knoten hält, mit Ruck auf den Hosenboden, Stille, der Sack explodiert; schneeweißer Wichtel niest und hinterlässt Fußspuren |
+| back_ofen | Ecke unten | Lebkuchenmännchen entwischen aus dem Ofen, er stopft sie zurück und lehnt sich an die Tür; heraus steigt ein riesiger Lebkuchenmann, Bocksprung über ihn, der Riese grinst und zwängt sich zurück |
+| back_lebkuchenhaus | unten | Dach drauf, alles klappt flach; mit viel Zuckerguss steht es, Triumph; ein Bonbon auf den First, Einsturz, das Dach sitzt als Hut auf dem Wichtel |
+| back_bratapfel | unten + Ecke | Finger verbrannt, Dampf ins Gesicht, ganzer Apfel in den Mund: knallrot, Dampf aus den Ohren, Mütze fliegt; Kopfsprung in den Schneehaufen, es zischt, die Mütze landet auf dem Stiefel, er versinkt |
+| back_keksdose | unten | Dose hängt am Deckel, Fuß dagegen, schütteln, horchen: Deckel knallt davon, Keksfontäne begräbt ihn; er futtert sich frei, kugelrund, Deckel auf den Kopf, er rollt davon |
+
+Schreck: Standardschreck, als Teigrolle oder kugelrund rollt er davon, aus dem Schneehaufen versinkt er nach unten.
