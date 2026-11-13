@@ -5,7 +5,7 @@ from PyQt6.QtCore import QRectF
 from zeichnen.baeckerei import MEHL, Bestaeubt, zeichne_mehlsack
 from zeichnen.figur import Pose
 from zeichnen.figuren import Wichtel
-from zeichnen.grundlagen import blinzeln
+from zeichnen.grundlagen import KEIN_STIFT, blinzeln
 
 from .back_bausteine import publikum, zittern
 from .basis import Gehe, Jeweils, Mit, Setze, Springe, Stehe, Szene, Tu, Wandel, Warte
@@ -57,9 +57,10 @@ class BackMehl(Szene):
 
         def boom(sz):
             sz.w.mehl = 1.0
-            for _ in range(3):
-                sz.streue(sz.sx, sz.boden - 70 * s, 26, WOLKE, tempo=330, dauer=1.9, r=(18, 40))
-            sz.streue(sz.w.x, sz.boden - 60 * s, 18, WOLKE, tempo=200, dauer=1.6, r=(18, 36))
+            for _ in range(4):
+                sz.streue(sz.sx, sz.boden - 70 * s, 30, WOLKE, tempo=260, dauer=2.0, r=(28, 60))
+            sz.streue((sz.sx + sz.w.x) / 2, sz.boden - 60 * s, 30, WOLKE, tempo=160, dauer=1.8, r=(30, 55))
+            sz.streue(sz.w.x, sz.boden - 50 * s, 24, WOLKE, tempo=120, dauer=1.7, r=(26, 50))
 
         def platt(sz, u):
             sz.platt = min(1.0, u / 0.4)
@@ -93,6 +94,7 @@ class BackMehl(Szene):
                                                  mund_offen=u > 0.3))),
             ziehen_mit(ziehen(2.6, 0.5)),
             Mit('w', Jeweils(0.01, ruck)),
+            Mit('w', Setze(neigung=-18)),
             Mit('w', Springe(lambda d: (d.x - r * 70 * s, d.boden), 0.45, 40)),
             Mit('w', Jeweils(0.9, sitzen)),
             Tu(lambda sz: sz.streue(sz.sx, sz.boden - 85 * s, 4, WOLKE, tempo=40, r=(4, 8))),
@@ -121,6 +123,7 @@ class BackMehl(Szene):
 
     def zeichne_hinten(self, p):
         s = self.s
+        p.setPen(KEIN_STIFT)
         p.setBrush(MEHL)
         for i, x in enumerate(self.spuren):
             p.drawEllipse(QRectF(x - 9 * s + (i % 2) * 6 * s, self.boden - 4 * s, 16 * s, 5 * s))
