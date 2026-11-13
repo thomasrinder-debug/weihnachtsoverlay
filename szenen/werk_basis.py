@@ -70,3 +70,27 @@ def verpuffen(sz, x, y, breite, hoehe, anzahl=18):
 def schweiss(sz, x, y):
     sz.streue(x, y, 1, QColor(160, 210, 255, 220), tempo=60, dauer=0.5, r=(2, 3.5), schwer=True,
               richtung=-math.pi / 2, streuung=1.0)
+
+
+def greife(sz, zx, zy, neigung=None):
+    """Der Weihnachtsmann greift mit der vorderen Hand nach (zx, zy): sucht den Armwinkel für
+    die Höhe und rückt ihn waagerecht zurecht. Die übrige Pose bleibt."""
+    if neigung is not None:
+        sz.neigung = neigung
+    lo, hi = -180.0, 0.0
+    for _ in range(18):
+        mitte = (lo + hi) / 2
+        sz.pose.arm_v = mitte
+        if hand(sz)[1] < zy:
+            lo = mitte
+        else:
+            hi = mitte
+    hx, _ = hand(sz)
+    sz.x += zx - hx
+
+
+def haenge_an(sz, zx, zy, darsteller=False):
+    """Verschiebt die Figur (x und hopp), bis ihre vordere Hand bei (zx, zy) ist."""
+    hx, hy = hand(sz, darsteller)
+    sz.x += zx - hx
+    sz.hopp -= zy - hy
