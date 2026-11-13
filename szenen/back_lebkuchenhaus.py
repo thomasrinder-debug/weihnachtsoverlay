@@ -65,9 +65,9 @@ class BackLebkuchenhaus(Szene):
             Mit('w', Stehe(0.35, Pose(arm_v=-30, arm_h=-20, auge_zu=True))),
             *self.einsturz(),
             Mit('w', Setze(striche=True, pose=Pose(kopf_vorn=True, schreck=1.0, arm_v=-120, arm_h=-110))),
-            Mit('w', Stehe(0.4, Pose(kopf_vorn=True, schreck=1.0, arm_v=-120, arm_h=-110))),
+            Mit('w', Stehe(0.3, Pose(kopf_vorn=True, schreck=1.0, arm_v=-120, arm_h=-110))),
             Mit('w', Setze(striche=False)),
-            Mit('w', publikum(0.6, sorge=0.7)),
+            Mit('w', publikum(0.5, sorge=0.7)),
             Mit('w', Stehe(0.3, Pose(arm_v=-150, arm_h=-140, mund_offen=True))),
             Wandel(0.45, aL=0.0, aR=0.0, fh=1.0, dy=0.0, spreiz=0.0),
             Mit('w', Gehe(bis=stand - r * 20 * s, tempo=0.4, haltung=lambda p, d: Pose(
@@ -94,7 +94,7 @@ class BackLebkuchenhaus(Szene):
             Mit('w', Wandel(0.2, stauchen=1.0)),
             Mit('w', publikum(0.9)),
             Mit('w', Setze(richtung=lambda d: d.naechster_rand())),
-            Mit('w', Gehe(tempo=0.8, haltung=lambda p, d: Pose(bein_v=p.bein_v, bein_h=p.bein_h, hub=p.hub,
+            Mit('w', Gehe(tempo=1.0, haltung=lambda p, d: Pose(bein_v=p.bein_v, bein_h=p.bein_h, hub=p.hub,
                                                                arm_v=-90, arm_h=-80))),
         ]
 

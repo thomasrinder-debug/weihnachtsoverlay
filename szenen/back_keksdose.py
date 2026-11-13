@@ -136,7 +136,7 @@ class BackKeksdose(Szene):
     def schreck_ablauf(self):
         self.in_hand = False
         if self.stauchen < 1:
-            return [Setze(striche=True), _Roll(4.0)]
+            return [Setze(striche=True), _Roll(2.6)]
         self.berg = 0.0
         self.kekse.clear()
         return [Setze(neigung=0.0), *super().schreck_ablauf()]

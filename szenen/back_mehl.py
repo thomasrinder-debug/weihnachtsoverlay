@@ -101,12 +101,12 @@ class BackMehl(Szene):
             Mit('w', Jeweils(0.7, sitzen)),
             Tu(boom),
             Jeweils(0.4, platt),
-            Mit('w', Jeweils(1.1, sitzen)),
+            Mit('w', Jeweils(0.9, sitzen)),
             Mit('w', Setze(stauchen=1.0)),
-            Mit('w', publikum(0.9)),
+            Mit('w', publikum(0.8)),
             Mit('w', Jeweils(0.8, niesen)),
             Mit('w', Setze(neigung=0.0, richtung=lambda d: d.naechster_rand())),
-            Mit('w', Gehe(tempo=0.8)),
+            Mit('w', Gehe(tempo=1.0)),
             WarteSpuren(),
         ]
 

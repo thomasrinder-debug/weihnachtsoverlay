@@ -96,7 +96,7 @@ class BackNudelholz(Szene):
             rollen(1.3, 38, 34, 52, 6),
             Setze(rollen=False), Jeweils(0.01, lambda sz, u: merken(sz)),
             Wandel(0.35, neigung=0.0),
-            Stehe(0.9, lambda sz, u: Pose(arm_v=-150, arm_h=-140, arm_v_x=20, bein_v=-14, bein_h=14,
+            Stehe(0.8, lambda sz, u: Pose(arm_v=-150, arm_h=-140, arm_v_x=20, bein_v=-14, bein_h=14,
                                          mund_offen=u < 0.4, auge_zu=u > 0.4)),
             Setze(augen=True, boese=1.0),
             Jeweils(0.3, schnurren),
@@ -105,9 +105,9 @@ class BackNudelholz(Szene):
             Setze(striche=True, teig_xy=lambda sz: (sz.tx, sz.boden)),
             Jeweils(0.45, anspringen),
             Setze(kokon=True, teig_xy=None, striche=False, holz=lambda sz: sz.holz_los()),
-            publikum(1.3, sorge=0.7),
+            publikum(1.0, sorge=0.7),
             Setze(richtung=lambda sz: sz.naechster_rand()),
-            Hoppel(tempo=1.4, hoehe=16,
+            Hoppel(tempo=1.7, hoehe=16,
                    haltung=lambda p, sz: Pose(hub=p.hub, kopf_vorn=True, sorge=0.7, auge_zu=p.auge_zu)),
         ]
 
