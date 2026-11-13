@@ -371,8 +371,9 @@ def zeichne_saegebock(p, kipp=(0.0, 0.0), schnitt=0.0, hoehe=62, breite=112):
         # halber Balken bis zur Mitte
         x0 = -fx if seite > 0 else -fx - breite / 2
         holzbalken(p, QRectF(x0 + (1 if seite > 0 else 0), -hoehe, breite / 2 - 1, 11))
-        p.setBrush(HOLZ_DUNKEL)
-        p.drawRect(QRectF(-fx + (0 if seite > 0 else -26), -hoehe * 0.45, 26, 4))
+        if winkel < 3:
+            p.setBrush(HOLZ_DUNKEL)
+            p.drawRect(QRectF(-fx + (0 if seite > 0 else -26), -hoehe * 0.45, 26, 4))
         p.restore()
     if 0 < schnitt < 1:
         p.setBrush(QColor('#3B2412'))
