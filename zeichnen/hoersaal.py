@@ -433,33 +433,40 @@ def zeichne_wanduhr(p, r, minute, stunde, sekunde, zittern=0.0):
 
 def zeichne_bart_lang(p, laenge, wehen=0.0, t=0.0):
     """Verlängerung des Barts in Weihnachtsmann-Einheiten (Seitenansicht): fällt vom Kinn
-    (etwa (16, -130)) bis zum Boden und häuft sich davor. laenge 0..1."""
+    (etwa (16, -130)) wallend bis zum Boden und häuft sich davor. laenge 0..1."""
     if laenge <= 0:
         return
-    unten = -130 + 140 * min(1.0, laenge / 0.6)
+    unten = -130 + 128 * min(1.0, laenge / 0.6)
     haufen = max(0.0, (laenge - 0.6) / 0.4)
+
+    def rand(y, seite):
+        f = (y + 140) / 140
+        mitte = 18 + wehen * f + 6 * math.sin(y * 0.05 + t * 2)
+        return mitte + seite * (20 + 16 * f)
+
     pfad = QPainterPath()
-    pfad.moveTo(-2, -140)
-    pfad.cubicTo(-8, -100, 6 + wehen, unten - 30, 4 + wehen, unten)
-    pfad.lineTo(40 + wehen + 90 * haufen, unten)
-    pfad.cubicTo(44 + wehen, unten - 40, 46, -110, 40, -140)
+    ys = list(range(-140, int(unten) + 1, 6)) + [unten]
+    pfad.moveTo(rand(-140, -1), -140)
+    for y in ys:
+        pfad.lineTo(rand(y, -1), y)
+    for y in reversed(ys):
+        pfad.lineTo(rand(y, 1), y)
     pfad.closeSubpath()
     p.setPen(KEIN_STIFT)
-    p.setBrush(linear(0, -140, 0, unten, WEISS, QColor('#E4E7EE')))
+    p.setBrush(linear(0, -140, 0, unten, WEISS, QColor('#E6E9F0')))
     p.drawPath(pfad)
-    rand = [(4 + wehen * (y + 140) / 140 - 4 + 3 * math.sin(y * 0.2 + t * 3), y) for y in range(-130, int(unten), 12)]
-    rand += [(40 + wehen * (y + 140) / 140 + 4, y) for y in range(-126, int(unten), 13)]
-    flausch(p, rand, 7)
+    locken = [(rand(y, -1), y) for y in range(-132, int(unten), 11)]
+    locken += [(rand(y, 1), y) for y in range(-128, int(unten), 11)]
+    flausch(p, locken, 7.5)
     if haufen > 0:
-        flausch(p, [(4 + wehen + k * 10 * (0.4 + haufen), -6 - 4 * math.sin(k * 1.3)) for k in range(int(5 + 9 * haufen))],
-                9 + 4 * haufen)
-    p.setPen(stift(QColor(190, 196, 210, 160), 1.6))
+        n = int(4 + 10 * haufen)
+        flausch(p, [(rand(unten, -1) + k * (12 + 4 * haufen), -7 - 5 * abs(math.sin(k * 1.3))) for k in range(n)],
+                8 + 5 * haufen)
+    p.setPen(stift(QColor(200, 205, 218, 170), 1.6))
     p.setBrush(KEIN_PINSEL)
-    for k in range(4):
-        w = QPainterPath()
-        w.moveTo(10 + k * 7, -120)
-        w.cubicTo(6 + k * 7, -80, 16 + k * 7 + wehen * 0.5, unten - 40, 12 + k * 7 + wehen, unten - 6)
-        p.drawPath(w)
+    for k, y in enumerate(range(-120, int(unten) - 8, 14)):
+        x = rand(y, 0) + (k % 3 - 1) * 9
+        p.drawArc(QRectF(x - 5, y - 4, 10, 9), 200 * 16, 200 * 16)
     p.setPen(KEIN_STIFT)
 
 
