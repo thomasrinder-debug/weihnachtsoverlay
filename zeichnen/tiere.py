@@ -327,7 +327,8 @@ KEHLCHEN_ROT = QColor('#F0662E')
 
 
 class Rotkehlchen:
-    """Kleines Rotkehlchen. d.plustern (1 = normal, 4 = Riesenkugel), d.fluegel (Grad), d.zittern."""
+    """Kleines Rotkehlchen. d.plustern (1 = normal, 4 = Riesenkugel), d.fluegel (Grad), d.zittern,
+    d.roll (Grad) dreht die Kugel um ihre Mitte."""
     KASTEN = QRectF(-90, -190, 180, 196)
     KOPF = (4, -40)
 
@@ -345,6 +346,15 @@ class Rotkehlchen:
         cy = -14 - r
         zit = math.sin(t * 60) * 1.2 * getattr(d, 'zittern', 0.0)
         p.translate(zit, 0)
+        duenn = getattr(d, 'duenn', 1.0)
+        if duenn != 1.0:
+            p.scale(duenn, 2 - duenn)
+        roll = getattr(d, 'roll', 0.0)
+        if roll:
+            p.translate(0, 14 * (1 - math.cos(math.radians(roll))) / 2)
+            p.translate(0, cy)
+            p.rotate(roll)
+            p.translate(0, -cy)
         # Beinchen
         p.setPen(stift(QColor('#6B4A2E'), 2))
         for dx in (-4, 4):
