@@ -537,8 +537,8 @@ class Robbe:
     """Robbe, aufgerichtet; Ursprung tief im Körper (für das Eisloch). d.zieh (1..2): wird
     länger wie eine Ziehharmonika, d.verschraenkt: Flossen vor der Brust gekreuzt,
     d.flosse (Grad) bewegt die Vorderflossen, d.schwanz: Schwanzflosse sichtbar (liegend)."""
-    KASTEN = QRectF(-60, -200, 120, 206)
-    KOPF = (0, -190)
+    KASTEN = QRectF(-60, -290, 120, 345)
+    KOPF = (0, -170)
 
     @staticmethod
     def zeichne(p, d):
