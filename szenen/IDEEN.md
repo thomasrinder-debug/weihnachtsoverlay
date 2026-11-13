@@ -118,3 +118,22 @@ Wunsch von Thomas: Osterhasen und Glückskatzen (Winkekatze mit erhobener Pfote)
 | rollentausch | unten | Puff: er trägt Hasenohren und hoppelt immer höher bis auf den Hosenboden, der Hase mit Mütze wird vom Sack plattgedrückt; Puff, alles zurück |
 
 Schreck: die Winkekatze fliegt mit der Propellerpfote zum nächsten Rand, Hasen hoppeln davon, Eier kullern hinaus.
+
+## Wichtelwerkstatt
+
+Acht Szenen rund um Werkbank, Werkzeug und Spielzeug, das sich selbständig macht. Alles nach den Regeln aus der Professor-Überarbeitung: 8–13 s, Problem nach höchstens 2,5 s, bis zu drei Versuche, Erwartungspause, große körperliche Pointe, kurze Reaktion. Die acht Entwürfe hat ChatGPT schonungslos bewertet; gestrichen wurden ein Kreisel (Schnurwickeln bei 15 % nicht lesbar) und eine Qualitätskontrolle mit Springteufel (zu nah am vorhandenen Paket-Federsprung), dafür kamen **GPT** Holzeisenbahn und Schraubstock dazu. Von ChatGPT stammen auch die Schärfungen: Mütze richten unmittelbar vor dem Vollgas, die Maus versagt sofort, beim Sägen die vorgetäuschte Entwarnung, die Feder an der Papierrolle als Vorwarnung, die Kapsel obenauf.
+
+Zeichnungen in `zeichnen/werkstatt.py` (Fließband, Kiste und Spielzeugwanne, Blechmaus, Holzbahn, Hammer, Nagel, Sägebock, Papierrolle mit Feder, Rohrpost, Schraubstock, gezogener Bart), gemeinsame Bausteine in `szenen/werk_basis.py` (`greife`: Hand an einen Punkt führen, `haenge_an`: Figur an der Hand aufhängen, `Blick`, `verpuffen`). Requisiten verschwinden am Ende und beim Schreck in einer Staubwolke.
+
+| Name | Rand | Gag |
+|---|---|---|
+| werk_band | unten | Wichtel am Fließband, die Päckchen kommen immer schneller, er rennt auf dem Band und kommt nicht vom Fleck; Stopp, Mütze richten, Vollgas: es schleudert ihn in die Kiste, nur die Mützenspitze schaut heraus, die Kiste fährt rückwärts davon |
+| werk_maus | unten | Blechmaus kippt nach dem ersten Aufziehen um, nach dem wilden Aufziehen rührt sie sich nicht; er beugt sich heran, sie rast los und zieht ihn waagerecht wie einen Wasserskifahrer hinaus, dann holt sie sich seine Mütze |
+| werk_bahn | unten | Lok und Flachwagen sausen unter dem breitbeinigen Wichtel durch, der hohe Wagen bleibt hängen, Anlauf, er sitzt beleidigt oben drauf (Mützen-Gag) und wird rückwärts hinausgefahren |
+| werk_hammer | unten | zwei Klopfer knapp neben den Fingern, dann der Riesenhammer: der Weihnachtsmann steckt bis zum Bauch im Boden, den Nagel noch in der Hand, und versinkt nach dem Publikumsblick ganz |
+| werk_saege | unten | Wichtel sägt auf dem Bock sitzend das Brett durch, das Ende fällt, ihm passiert nichts, Triumph; dann klappt der mitdurchgesägte Bock auseinander (Mützen-Gag) |
+| werk_papier | Ecke unten | Papierrolle mit Feder schnappt einmal zurück; beim zweiten Mal rennt er weit, stemmt sich, Pause, sie wickelt ihn ein und die Walze mit strampelnden Schuhen rollt davon |
+| werk_rohrpost | Seite | Kapseln plumpsen in den Korb, eine trifft den Kopf; eine Riesenkapsel steckt fest, er zieht, sie saust ins Rohr und nimmt ihn mit, eine Beule wandert hinauf, er schießt kopfüber in den Korb, die Kapsel landet auf seinen Sohlen |
+| werk_schraubstock | unten | der Wichtel kurbelt den Bart in den Schraubstock, bekommt ihn nicht auf, der Bart wird meterlang; Schnapp, der Weihnachtsmann fliegt rückwärts in die Spielzeugwanne und rollt hinaus |
+
+Schreck: Wichtel und Weihnachtsmann rennen zum nächsten Rand, Requisiten verpuffen; wer gerade in Kiste, Wanne oder Walze steckt, fährt oder rollt darin davon.

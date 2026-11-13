@@ -157,20 +157,21 @@ class Aufziehmaus(Szene):
     def schreck_ablauf(self):
         self.nebenbei.clear()
         neu = []
-        if self.maus_da and QRectF(self.mx - 60 * self.s, self.boden - 80 * self.s, 120 * self.s,
+        gezogen = self.zeige_figur and self.neigung >= 60
+        if self.maus_da and not gezogen and QRectF(self.mx - 60 * self.s, self.boden - 80 * self.s, 120 * self.s,
                                    80 * self.s).intersects(self.geo):
             self.mdreh, self.mzitt = 0.0, 0.0
             neu.append(Nebenbei(Rasen(tempo=6.0)))
         if self.hut and self.hut['liegt']:
             verpuffen(self, self.hut['x'], self.hut['y'], 40 * self.s, 30 * self.s, 8)
             self.hut = None
-        if self.zeige_figur and self.figur_sichtbar() and self.neigung < 60:
+        if not (self.zeige_figur and self.figur_sichtbar()):
+            self.zeige_figur = False
+        elif self.neigung < 60:
             self.neigung, self.hopp = 0.0, 0.0
             neu += [Erschrecke(0.35, 40), Renne(zum='rand')]
-        elif self.neigung >= 60:
-            neu.append(Rasen(-self.richtung, 6.5, mit_ihm=True))
         else:
-            self.zeige_figur = False
+            neu.append(Rasen(-self.richtung, 6.5, mit_ihm=True))
         return neu + [Warte(0.05), WarteBisWeg()]
 
     def weiter(self, dt):
