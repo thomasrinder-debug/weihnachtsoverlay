@@ -118,3 +118,22 @@ Wunsch von Thomas: Osterhasen und Glückskatzen (Winkekatze mit erhobener Pfote)
 | rollentausch | unten | Puff: er trägt Hasenohren und hoppelt immer höher bis auf den Hosenboden, der Hase mit Mütze wird vom Sack plattgedrückt; Puff, alles zurück |
 
 Schreck: die Winkekatze fliegt mit der Propellerpfote zum nächsten Rand, Hasen hoppeln davon, Eier kullern hinaus.
+
+## Siebte Runde: Wintertiere
+
+Acht neue Tiere, alle frei gestaltet (`zeichnen/tiere.py`): Fuchs, Elch mit Schaufelgeweih, Robbe, Schneeeule, Dachs, Schneehase, Rotkehlchen und Murmeltier, dazu Ast, Eisloch, Schneedecke und leere Stiefel. Gemeinsame Bausteine in `szenen/tier_gemeinsam.py`: `Flug` (Bogen mit Drehung und Erwartungspause im Scheitel), `publikumsblick`, `wegfliegen` für Vögel und `figur_mit_beinen` für den sitzenden Weihnachtsmann mit ausgestreckten Beinen (wahlweise in Socken).
+
+Die Entwürfe hat ChatGPT bewertet (Noten 2–4) und geschärft: die Eule nicht als Kreisel (wie „kabel“), sondern mit dem dünnen Ast; der Dachs-Hügel hebt ihn hoch, statt dass er davonreitet; die Robbe rutscht rückwärts wieder ins Loch; der Hase bekommt das Festhalten vor dem Salto; beim Murmeltier bläst der Pfiff ihn aus den Stiefeln, die dann Kopfkissen werden. Das Rotkehlchen rollt als Federkugel davon statt wie ein Luftballon zu fliegen (zu nah an „ventilator“).
+
+| Name | Rand | Gag |
+|---|---|---|
+| tier_fuchs | unten | Mäuselsprung in die Wehe: Schnauze steckt, halber Fuchs strampelt, dritter Sprung mit Pause im Scheitel ganz hinein; die Wehe steht auf vier Fuchsbeinen auf und marschiert davon |
+| tier_elch | unten | Rotkehlchen und dicke Schneeeule auf dem Geweih, er stemmt sich breitbeinig dagegen; das Rotkehlchen hüpft einmal, er überschlägt sich und liegt mit den Beinen in der Luft, die Eule landet auf seinem Bauch |
+| tier_robbe | unten | Eisloch friert zu, Flossen, Zappeln, Ziehharmonika, Plopp wie ein Korken; sie rutscht rückwärts genau wieder hinein und verschränkt beleidigt die Flossen |
+| tier_eule | Seite oben | dünner Ast biegt sich, sie rückt zweimal näher zum Stamm, breitet erleichtert die Flügel aus, der Ast katapultiert sie kopfüber an die Oberkante; eine einzelne Feder biegt den Ast bis zum Anschlag |
+| tier_dachs | unten | Schneehügel folgt ihm, hebt ihn im Spagat zur Säule hoch und verschwindet; er plumpst hin, der Dachs schaut mit seiner Mütze heraus |
+| tier_hase | unten | der Schneehaufen, auf den er sich setzen will, ist ein Schneehase: zweimal Plumps, beim dritten Mal Festhalten, Triumph, Riesensatz, Rückwärtssalto |
+| tier_rotkehlchen | unten | plustert sich bei jeder Bö weiter auf, die Riesenkugel rollt aus dem Bild und wieder herein, kopfüber; Federn anlegen, spindeldürr und schlotternd |
+| tier_murmeltier | unten | Antippen, Rütteln, Decke wegreißen; das Murmeltier pfeift ihn aus den Stiefeln, nimmt sie als Kopfkissen, die Decke fliegt zurück |
+
+Schreck: Vögel flattern zum nächsten Rand, die Robbe taucht ab (oder rutscht hinaus), der Dachs taucht ab, die Fuchs-Wehe rennt auf ihren Beinen davon, die übrigen Tiere hüpfen und rennen; Ast, Eisloch und Decke blenden aus.
