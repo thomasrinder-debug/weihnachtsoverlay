@@ -482,8 +482,8 @@ def zeichne_klappsitz(p, klappe):
     wange.moveTo(-34, 0)
     wange.lineTo(-30, -112)
     wange.lineTo(-14, -112)
-    wange.lineTo(-10, -60)
-    wange.lineTo(18, -60)
+    wange.lineTo(-10, -50)
+    wange.lineTo(18, -50)
     wange.lineTo(22, 0)
     wange.closeSubpath()
     p.drawPath(wange)
@@ -491,16 +491,16 @@ def zeichne_klappsitz(p, klappe):
     p.drawRoundedRect(QRectF(-44, -6, 74, 8), 3, 3)
     # Rückenlehne
     p.save()
-    p.translate(-26, -64)
+    p.translate(-26, -54)
     p.rotate(-8)
     p.setBrush(linear(-10, 0, 10, 0, HOLZ_HELL, HOLZ_DUNKEL))
     p.drawRoundedRect(QRectF(-12, -96, 18, 100), 8, 8)
     p.setBrush(linear(0, -90, 0, 0, QColor('#C23B3B'), QColor('#7A1F2A')))
     p.drawRoundedRect(QRectF(-6, -88, 12, 80), 5, 5)
     p.restore()
-    # Sitzfläche am Gelenk (-12, -62)
+    # Sitzfläche am Gelenk (-12, -52)
     p.save()
-    p.translate(-12, -62)
+    p.translate(-12, -52)
     p.rotate(-90 * klappe)
     p.setBrush(linear(0, -6, 0, 10, HOLZ_HELL, HOLZ_DUNKEL))
     p.drawRoundedRect(QRectF(-2, -4, 66, 12), 6, 6)
@@ -508,9 +508,23 @@ def zeichne_klappsitz(p, klappe):
     p.drawRoundedRect(QRectF(2, -14, 60, 12), 6, 6)
     p.restore()
     p.setBrush(METALL_DUNKEL)
-    kreis(p, -12, -62, 4.5)
+    kreis(p, -12, -52, 4.5)
     p.setBrush(METALL_HELL)
-    kreis(p, -12, -62, 2)
+    kreis(p, -12, -52, 2)
+
+
+def zeichne_sitzflaeche_vorn(p, x0, x1, y0, y1):
+    """Hochgeklappte Sitzfläche von vorn gesehen, als Brett vor dem Eingeklemmten."""
+    p.setPen(KEIN_STIFT)
+    p.setBrush(linear(x0, 0, x1, 0, HOLZ_HELL, HOLZ_DUNKEL))
+    p.drawRoundedRect(QRectF(x0, y0, x1 - x0, y1 - y0), 9, 9)
+    p.setBrush(linear(0, y0, 0, y1, QColor('#D24A4A'), QColor('#8A2230')))
+    p.drawRoundedRect(QRectF(x0 + 6, y0 + 6, x1 - x0 - 12, y1 - y0 - 12), 7, 7)
+    p.setBrush(QColor(255, 255, 255, 50))
+    p.drawRoundedRect(QRectF(x0 + 10, y0 + 9, 8, y1 - y0 - 22), 4, 4)
+    p.setBrush(METALL_DUNKEL)
+    for x in (x0 + 4, x1 - 4):
+        kreis(p, x, y1 - 6, 4)
 
 
 def zeichne_staubwolke(p, x, y, r, a):
