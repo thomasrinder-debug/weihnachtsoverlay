@@ -119,6 +119,22 @@ Wunsch von Thomas: Osterhasen und Glückskatzen (Winkekatze mit erhobener Pfote)
 
 Schreck: die Winkekatze fliegt mit der Propellerpfote zum nächsten Rand, Hasen hoppeln davon, Eier kullern hinaus.
 
+## Weihnachten im Hörsaal
+
+Szenen, die mit dem spielen, was in der Vorlesung zu sehen ist: Laserpointer, Beamer, Folienwechsel, Mikrofon, Klausur, Glocke, Uhr, Klappsitz. Ohne den verrückten Professor. Requisiten in `zeichnen/hoersaal.py`, gemeinsame Bausteine (`Publikumsblick`, `Plumps` zum steifen Umkippen, `auf_figur` für Punkte auf dem Weihnachtsmann) in `szenen/hs_basis.py`. Die acht Entwürfe hat ChatGPT bewertet; übernommen wurden je eine Schärfung (**GPT**), etwa die Fahne am Mikrofonständer statt eines weiteren Mützenverlusts und der Wichtel in der Sackschlaufe statt eines zweiten Rückwegs zum Sack.
+
+| Name | Rand | Gag |
+|---|---|---|
+| hs_laser | unten | die Katze springt zweimal am Laserpunkt vorbei, beim Lachen landet der Punkt auf seinem Bauch: Sprung ins Gesicht, er kippt steif um; **GPT:** er hebt vorsichtig den Pointer, ihr Hintern wackelt schon wieder, er wirft ihn weg, die Katze hinterher |
+| hs_beamer | unten + Seite | Minibeamer, der Wichtelschatten an der Seitenwand wird riesig (Hasenohren, Geweih); **GPT:** der Weihnachtsmann erstarrt, nur die Knie schlottern; Buh mit Krallen, er hechtet kopfüber in den Sack, der strampelnd davonhüpft |
+| hs_folie | unten | eine Folienwisch-Kante macht ihn zum Schneemann mit Rauschebart, die nächste zurück, die dritte überspringt er; **GPT:** beim Freudensprung erwischt ihn die vierte, als Pinguin landet er auf dem Bauch und rutscht hinaus |
+| hs_mikro | unten | Antippen, Pusten, tief Luft holen: **GPT:** die Rückkopplung bläst ihn waagerecht, er flattert am Ständer wie eine Fahne und schaut dabei ins Publikum, dann Bauchklatscher; ein letzter Pieps jagt ihn hinaus |
+| hs_stempel | unten | Wichtel-Tutor stempelt Klausurblätter immer schneller, zuletzt blind; der Weihnachtsmann hebt ein Blatt auf und hält es stolz hoch, der Wichtel springt mit dem Stempel auf ihn: platt mit rotem Haken auf der Mütze; **GPT:** er ploppt nur halb hoch und watschelt breit hinaus |
+| hs_glocke | unten | er schläft im Sitzen, Handglocke, dann am Ohr, er wedelt im Schlaf; der Wichtel holt eine Riesenglocke aus dem Sack, DONG: senkrecht hoch und weg; **GPT:** der Wichtel hängt in der Sackschlaufe und wird mitgeschleift, nur die Mütze schwebt zurück |
+| hs_uhr | unten + Seite | die Wanduhr steht kurz vor Schluss; Antippen, Klopfen (Minutenzeiger klappt herunter), mit Schwung auf Schluss gedreht, Triumph; dann rast die Uhr, sein Bart wächst im Zeitraffer bis zum Boden, er tritt drauf und schlägt hin |
+| hs_klappsitz | unten | Hörsaal-Klappsitz: Plumps auf den Boden, dann schnellt er zu früh hoch und er kippt rücklings; beim dritten Mal sitzt er; **GPT:** zweimal nachfedern, zurücklehnen, Stille, Zuschnapp: zusammengeklappt, Stiefel neben dem Kopf, der Sitz hüpft mit ihm hinaus |
+
+Schreck: alle in 0,7–1,2 s vom Bildschirm, auch mitten im Liegen, Flattern oder Eingeklemmtsein.
 ## Wichtelwerkstatt
 
 Acht Szenen rund um Werkbank, Werkzeug und Spielzeug, das sich selbständig macht. Alles nach den Regeln aus der Professor-Überarbeitung: 8–13 s, Problem nach höchstens 2,5 s, bis zu drei Versuche, Erwartungspause, große körperliche Pointe, kurze Reaktion. Die acht Entwürfe hat ChatGPT schonungslos bewertet; gestrichen wurden ein Kreisel (Schnurwickeln bei 15 % nicht lesbar) und eine Qualitätskontrolle mit Springteufel (zu nah am vorhandenen Paket-Federsprung), dafür kamen **GPT** Holzeisenbahn und Schraubstock dazu. Von ChatGPT stammen auch die Schärfungen: Mütze richten unmittelbar vor dem Vollgas, die Maus versagt sofort, beim Sägen die vorgetäuschte Entwarnung, die Feder an der Papierrolle als Vorwarnung, die Kapsel obenauf.
