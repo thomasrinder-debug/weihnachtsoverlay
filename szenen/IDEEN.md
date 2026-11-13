@@ -137,3 +137,53 @@ Die Entwürfe hat ChatGPT bewertet (Noten 2–4) und geschärft: die Eule nicht 
 | tier_murmeltier | unten | Antippen, Rütteln, Decke wegreißen; das Murmeltier pfeift ihn aus den Stiefeln, nimmt sie als Kopfkissen, die Decke fliegt zurück |
 
 Schreck: Vögel flattern zum nächsten Rand, die Robbe taucht ab (oder rutscht hinaus), der Dachs taucht ab, die Fuchs-Wehe rennt auf ihren Beinen davon, die übrigen Tiere hüpfen und rennen; Ast, Eisloch und Decke blenden aus.
+## Weihnachten im Hörsaal
+
+Szenen, die mit dem spielen, was in der Vorlesung zu sehen ist: Laserpointer, Beamer, Folienwechsel, Mikrofon, Klausur, Glocke, Uhr, Klappsitz. Ohne den verrückten Professor. Requisiten in `zeichnen/hoersaal.py`, gemeinsame Bausteine (`Publikumsblick`, `Plumps` zum steifen Umkippen, `auf_figur` für Punkte auf dem Weihnachtsmann) in `szenen/hs_basis.py`. Die acht Entwürfe hat ChatGPT bewertet; übernommen wurden je eine Schärfung (**GPT**), etwa die Fahne am Mikrofonständer statt eines weiteren Mützenverlusts und der Wichtel in der Sackschlaufe statt eines zweiten Rückwegs zum Sack.
+
+| Name | Rand | Gag |
+|---|---|---|
+| hs_laser | unten | die Katze springt zweimal am Laserpunkt vorbei, beim Lachen landet der Punkt auf seinem Bauch: Sprung ins Gesicht, er kippt steif um; **GPT:** er hebt vorsichtig den Pointer, ihr Hintern wackelt schon wieder, er wirft ihn weg, die Katze hinterher |
+| hs_beamer | unten + Seite | Minibeamer, der Wichtelschatten an der Seitenwand wird riesig (Hasenohren, Geweih); **GPT:** der Weihnachtsmann erstarrt, nur die Knie schlottern; Buh mit Krallen, er hechtet kopfüber in den Sack, der strampelnd davonhüpft |
+| hs_folie | unten | eine Folienwisch-Kante macht ihn zum Schneemann mit Rauschebart, die nächste zurück, die dritte überspringt er; **GPT:** beim Freudensprung erwischt ihn die vierte, als Pinguin landet er auf dem Bauch und rutscht hinaus |
+| hs_mikro | unten | Antippen, Pusten, tief Luft holen: **GPT:** die Rückkopplung bläst ihn waagerecht, er flattert am Ständer wie eine Fahne und schaut dabei ins Publikum, dann Bauchklatscher; ein letzter Pieps jagt ihn hinaus |
+| hs_stempel | unten | Wichtel-Tutor stempelt Klausurblätter immer schneller, zuletzt blind; der Weihnachtsmann hebt ein Blatt auf und hält es stolz hoch, der Wichtel springt mit dem Stempel auf ihn: platt mit rotem Haken auf der Mütze; **GPT:** er ploppt nur halb hoch und watschelt breit hinaus |
+| hs_glocke | unten | er schläft im Sitzen, Handglocke, dann am Ohr, er wedelt im Schlaf; der Wichtel holt eine Riesenglocke aus dem Sack, DONG: senkrecht hoch und weg; **GPT:** der Wichtel hängt in der Sackschlaufe und wird mitgeschleift, nur die Mütze schwebt zurück |
+| hs_uhr | unten + Seite | die Wanduhr steht kurz vor Schluss; Antippen, Klopfen (Minutenzeiger klappt herunter), mit Schwung auf Schluss gedreht, Triumph; dann rast die Uhr, sein Bart wächst im Zeitraffer bis zum Boden, er tritt drauf und schlägt hin |
+| hs_klappsitz | unten | Hörsaal-Klappsitz: Plumps auf den Boden, dann schnellt er zu früh hoch und er kippt rücklings; beim dritten Mal sitzt er; **GPT:** zweimal nachfedern, zurücklehnen, Stille, Zuschnapp: zusammengeklappt, Stiefel neben dem Kopf, der Sitz hüpft mit ihm hinaus |
+
+Schreck: alle in 0,7–1,2 s vom Bildschirm, auch mitten im Liegen, Flattern oder Eingeklemmtsein.
+## Wichtelwerkstatt
+
+Acht Szenen rund um Werkbank, Werkzeug und Spielzeug, das sich selbständig macht. Alles nach den Regeln aus der Professor-Überarbeitung: 8–13 s, Problem nach höchstens 2,5 s, bis zu drei Versuche, Erwartungspause, große körperliche Pointe, kurze Reaktion. Die acht Entwürfe hat ChatGPT schonungslos bewertet; gestrichen wurden ein Kreisel (Schnurwickeln bei 15 % nicht lesbar) und eine Qualitätskontrolle mit Springteufel (zu nah am vorhandenen Paket-Federsprung), dafür kamen **GPT** Holzeisenbahn und Schraubstock dazu. Von ChatGPT stammen auch die Schärfungen: Mütze richten unmittelbar vor dem Vollgas, die Maus versagt sofort, beim Sägen die vorgetäuschte Entwarnung, die Feder an der Papierrolle als Vorwarnung, die Kapsel obenauf.
+
+Zeichnungen in `zeichnen/werkstatt.py` (Fließband, Kiste und Spielzeugwanne, Blechmaus, Holzbahn, Hammer, Nagel, Sägebock, Papierrolle mit Feder, Rohrpost, Schraubstock, gezogener Bart), gemeinsame Bausteine in `szenen/werk_basis.py` (`greife`: Hand an einen Punkt führen, `haenge_an`: Figur an der Hand aufhängen, `Blick`, `verpuffen`). Requisiten verschwinden am Ende und beim Schreck in einer Staubwolke.
+
+| Name | Rand | Gag |
+|---|---|---|
+| werk_band | unten | Wichtel am Fließband, die Päckchen kommen immer schneller, er rennt auf dem Band und kommt nicht vom Fleck; Stopp, Mütze richten, Vollgas: es schleudert ihn in die Kiste, nur die Mützenspitze schaut heraus, die Kiste fährt rückwärts davon |
+| werk_maus | unten | Blechmaus kippt nach dem ersten Aufziehen um, nach dem wilden Aufziehen rührt sie sich nicht; er beugt sich heran, sie rast los und zieht ihn waagerecht wie einen Wasserskifahrer hinaus, dann holt sie sich seine Mütze |
+| werk_bahn | unten | Lok und Flachwagen sausen unter dem breitbeinigen Wichtel durch, der hohe Wagen bleibt hängen, Anlauf, er sitzt beleidigt oben drauf (Mützen-Gag) und wird rückwärts hinausgefahren |
+| werk_hammer | unten | zwei Klopfer knapp neben den Fingern, dann der Riesenhammer: der Weihnachtsmann steckt bis zum Bauch im Boden, den Nagel noch in der Hand, und versinkt nach dem Publikumsblick ganz |
+| werk_saege | unten | Wichtel sägt auf dem Bock sitzend das Brett durch, das Ende fällt, ihm passiert nichts, Triumph; dann klappt der mitdurchgesägte Bock auseinander (Mützen-Gag) |
+| werk_papier | Ecke unten | Papierrolle mit Feder schnappt einmal zurück; beim zweiten Mal rennt er weit, stemmt sich, Pause, sie wickelt ihn ein und die Walze mit strampelnden Schuhen rollt davon |
+| werk_rohrpost | Seite | Kapseln plumpsen in den Korb, eine trifft den Kopf; eine Riesenkapsel steckt fest, er zieht, sie saust ins Rohr und nimmt ihn mit, eine Beule wandert hinauf, er schießt kopfüber in den Korb, die Kapsel landet auf seinen Sohlen |
+| werk_schraubstock | unten | der Wichtel kurbelt den Bart in den Schraubstock, bekommt ihn nicht auf, der Bart wird meterlang; Schnapp, der Weihnachtsmann fliegt rückwärts in die Spielzeugwanne und rollt hinaus |
+
+Schreck: Wichtel und Weihnachtsmann rennen zum nächsten Rand, Requisiten verpuffen; wer gerade in Kiste, Wanne oder Walze steckt, fährt oder rollt darin davon.
+## Weihnachtsbäckerei
+
+Acht Szenen nach dem Muster der überarbeiteten Professor-Szenen: 11–12 s, Problem nach etwa 2 s, drei Versuche mit wachsendem Körpereinsatz, Erwartungspause, große körperliche Pointe, Blick ins Publikum. Requisiten in `zeichnen/baeckerei.py` (Teig mit Gesicht, Nudelholz, Sternausstecher, Spritzbeutel, Zuckergusshaube, Mehlsack, Backofen, Lebkuchenplatten, Bratapfel, Keksdose, Keksberg) und `Bestaeubt`, eine Hülle, die jede Figur mit Mehl überpudert. Gemeinsames (Publikumsblick, Flugbahn für Requisiten, Kopf- und Handlage des Weihnachtsmanns) in `szenen/back_bausteine.py`. Zimtstern und Keks als Sägeblatt gab es schon, Alkohol (Rumkugeln, Stollen mit Rum) bleibt draußen.
+
+| Name | Rand | Gag |
+|---|---|---|
+| back_nudelholz | unten | Teig federt zweimal zurück und schaut böse, beim dritten Mal hauchdünn, Triumph; dann schnurrt er zur Kugel, springt ihn an und wickelt ihn ein, er hoppelt als Teigrolle davon |
+| back_ausstecher | unten | Wichtel drückt und stampft auf die Sternform, der Teig wird zum Trampolin, schleudert ihn hoch, er landet in der Form und trägt sie als Ballettröckchen |
+| back_spritzbeutel | unten | kein Guss kommt, er schaut in die Tülle, der Beutel bläht sich: Tortenhaube auf dem Kopf, die Kirsche landet obendrauf |
+| back_mehl | unten | Knoten hält, mit Ruck auf den Hosenboden, Stille, der Sack explodiert; schneeweißer Wichtel niest und hinterlässt Fußspuren |
+| back_ofen | Ecke unten | Lebkuchenmännchen entwischen aus dem Ofen, er stopft sie zurück und lehnt sich an die Tür; heraus steigt ein riesiger Lebkuchenmann, Bocksprung über ihn, der Riese grinst und zwängt sich zurück |
+| back_lebkuchenhaus | unten | Dach drauf, alles klappt flach; mit viel Zuckerguss steht es, Triumph; ein Bonbon auf den First, Einsturz, das Dach sitzt als Hut auf dem Wichtel |
+| back_bratapfel | unten + Ecke | Finger verbrannt, Dampf ins Gesicht, ganzer Apfel in den Mund: knallrot, Dampf aus den Ohren, Mütze fliegt; Kopfsprung in den Schneehaufen, es zischt, die Mütze landet auf dem Stiefel, er versinkt |
+| back_keksdose | unten | Dose hängt am Deckel, Fuß dagegen, schütteln, horchen: Deckel knallt davon, Keksfontäne begräbt ihn; er futtert sich frei, kugelrund, Deckel auf den Kopf, er rollt davon |
+
+Schreck: Standardschreck, als Teigrolle oder kugelrund rollt er davon, aus dem Schneehaufen versinkt er nach unten.
