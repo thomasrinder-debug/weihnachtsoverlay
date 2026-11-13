@@ -7,34 +7,9 @@ from zeichnen.grundlagen import blinzeln
 from zeichnen.tiere import Elch, Rotkehlchen, Schneeeule, elch_geweih_punkt, elch_punkt
 
 from .basis import Gehe, Jeweils, Mit, Nebenbei, Schritt, Setze, Stehe, Szene, Tu, Wandel, Warte, WarteNebenbei
-from .tier_gemeinsam import FEDERN, Flug, publikumsblick, puff, sterne
+from .tier_gemeinsam import FEDERN, Flug, puff, sterne, wegfliegen
 
 ELCH_G, EULE_G, VOGEL_G = 0.72, 0.62, 1.1
-
-
-def wegfliegen(sz, name, dauer=0.7):
-    """Ein Vogel flattert schräg nach oben zum nächsten Seitenrand hinaus."""
-    d = sz.darsteller[name]
-    seite = d.naechster_rand()
-    return Mit(name, Folge2(Setze(fliegt=True, richtung=seite),
-                            Flug(lambda w: (sz.aussen(seite), w.y - 260 * sz.s), dauer, hoehe=0)))
-
-
-class Folge2(Schritt):
-    """Wie Folge, aber für Mit: führt Schritte mit dem Darsteller nacheinander aus."""
-
-    def __init__(self, *schritte):
-        from .basis import Folge
-        self.f = Folge(*schritte)
-
-    def beginn(self, sz):
-        self.f.beginn(sz)
-
-    def weiter(self, sz, u, dt):
-        self.f.weiter(sz, u, dt)
-
-    def fertig(self, sz, u):
-        return self.f.fertig(sz, u)
 
 
 class AufPlatz(Schritt):

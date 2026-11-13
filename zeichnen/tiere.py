@@ -910,3 +910,20 @@ def zeichne_stiefel(p, x, y):
         p.setBrush(QColor('#4A3426').darker(k))
         p.drawRoundedRect(QRectF(bx - 12, y - 3, 34, 4), 2, 2)
         flausch(p, [(bx - 9, y - 40), (bx - 3, y - 41), (bx + 3, y - 41), (bx + 9, y - 40)], 5, k == 100)
+
+
+def zeichne_einzelfeder(p, x, y, winkel=0.0, laenge=22):
+    """Eine einzelne weiße Feder, Mitte in (x, y)."""
+    p.save()
+    p.translate(x, y)
+    p.rotate(winkel)
+    p.setBrush(radial(0, 0, laenge * 0.6, EULE, EULE_SCHATTEN))
+    feder = QPainterPath()
+    feder.moveTo(-laenge / 2, 0)
+    feder.cubicTo(-laenge / 4, -laenge * 0.28, laenge / 4, -laenge * 0.3, laenge / 2, 0)
+    feder.cubicTo(laenge / 4, laenge * 0.2, -laenge / 4, laenge * 0.22, -laenge / 2, 0)
+    p.drawPath(feder)
+    p.setPen(stift(EULE_SCHATTEN.darker(130), 1.0))
+    p.drawLine(QPointF(-laenge * 0.62, 1), QPointF(laenge * 0.45, -1))
+    p.setPen(KEIN_STIFT)
+    p.restore()

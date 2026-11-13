@@ -6,7 +6,7 @@ from PyQt6.QtGui import QColor
 from zeichnen.figur import Pose, figur, zeichne_bein_ik
 from zeichnen.grundlagen import GOLD_HELL, ROT_DUNKEL, ROT_HELL, WEISS, blinzeln, glatt, linear
 
-from .basis import Mit, Schritt, Stehe, wert
+from .basis import Folge, Mit, Schritt, Setze, Stehe, wert
 
 SCHNEE = [QColor(255, 255, 255, 230), QColor(220, 235, 250, 220)]
 FEDERN = [QColor(255, 255, 255, 240), QColor(235, 238, 245, 230)]
@@ -110,3 +110,11 @@ def figur_mit_beinen(sz, p, stiefel=True, spreiz=0.0, zwischen=None):
 
 def wackel(u, staerke=1.0, tempo=30):
     return math.sin(u * tempo) * staerke
+
+
+def wegfliegen(sz, name, dauer=0.7, hoch=260):
+    """Ein Vogel flattert schräg nach oben zum nächsten Seitenrand hinaus (d.fliegt = True)."""
+    d = sz.darsteller[name]
+    seite = d.naechster_rand()
+    return Mit(name, Folge(Setze(fliegt=True, richtung=seite, neigung=0.0),
+                           Flug(lambda w: (sz.aussen(seite), w.y - hoch * sz.s), dauer, hoehe=0)))
