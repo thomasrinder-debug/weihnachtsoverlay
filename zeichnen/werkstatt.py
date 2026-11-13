@@ -525,7 +525,9 @@ def zeichne_rohrpost(p, oben, mund, beule=0.0, beule_y=0.0, wackeln=0.0):
     rohr = QPainterPath()
     rohr.addRect(QRectF(-d, oben, 2 * d, -mund - oben - d))
     if beule:
-        rohr.addEllipse(QPointF(0, beule_y), d + 12 * beule, 30 + 10 * beule)
+        ei = QPainterPath()
+        ei.addEllipse(QPointF(0, beule_y), d + 12 * beule, 30 + 10 * beule)
+        rohr = rohr.united(ei)
     bogen = QPainterPath()
     bogen.moveTo(-d, -mund - d - 1)
     bogen.quadTo(-d, -mund + d, d, -mund + d)
